@@ -356,7 +356,8 @@ def main():
 				print("Found file name: " + format_txt)
 				print_mu.release()
 
-	print vid_links
+	if verbose:
+		print vid_links
 
 	if(len(episode_range) > 0):
 		rm_links = []
