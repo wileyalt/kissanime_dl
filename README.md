@@ -1,22 +1,16 @@
-kissanime_dl
+#kissanime_dl
 
 
 Downloads all mp4s from a kiss_anime mastersite!
-
 (kissanime.to/Anime/*)
 
 
-Dependencies:
-
+#Dependencies:
 lxml
-
 requests
 
 
-Usage:
-
+#Usage:
 First argument: the url to the kissanime.to/Anime/* page.
-
 Second argument: the path to download files to
-
 Optional argument: --verbose
