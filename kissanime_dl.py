@@ -161,36 +161,19 @@ def printError():
 	print("    Val is the number of threads to SEARCH for the download links")
 	print("    Defaults to 5")
 	print("    Downloading the files uses one thread per file and CANNOT be changed")
-	printClr("--help prints this message", Color.BOLD)
+	printClr("An optional argument is help", Color.BOLD)
 
 def main():
 	#beginning clock
 	start_time = time.time()
 	plat = platform.system()
 	print("Platform: " + plat)
-	if(len(sys.argv) < 3):
-		printClr("Error: kissanime_dl takes in 2 args, the url, and the path to download to", Color.BOLD, Color.RED)
-		printError()
-		return
-
-	url = sys.argv[1]
-	if(requests.head(url).status_code != requests.codes.ok and requests.head(url).status_code != 503):
-		print(url + " is not a valid url!")
-		printError()
-		return
-
-	dl_path = sys.argv[2]
-
-	if(os.path.isdir(dl_path) == False):
-		print(dl_path + " is not a valid directory to download to")
-		printError()
-		return
 
 	verbose = False
 	simulate = False
 	episode_range = []
 	MAX_THREADS = 5
-	
+
 	#optional args
 	if(len(sys.argv) > 3):
 		for i in range (3, len(sys.argv) ):
@@ -235,10 +218,44 @@ def main():
 				if verbose:
 					print("Searching for episodes between: " + episode_range[0] + " and " + episode_range[1])
 
+			elif(psd_arg.split('=')[0] == "--max_threads"):
+				str_val = psd_arg.split('=')[1]
+				if(not str_val.isdigit() ):
+					printClr("Error: " + str_val + " is not a valid value for threading", Color.BOLD, Color.RED)
+					return
+
+				MAX_THREADS = int(psd_arg.split('=')[1])
+
+				if(MAX_THREADS < 1):
+					printClr("Error: Cannot have max threads less than 1", Color.BOLD, Color.RED)
+					return
+
 			else:
 				printClr("Unknown argument: " + sys.argv[i], Color.BOLD, Color.RED)
 				printError()
 				return;
+
+	if(len(sys.argv) < 3):
+		printClr("Error: kissanime_dl takes in 2 args, the url, and the path to download to", Color.BOLD, Color.RED)
+		printError()
+		return
+
+	url = sys.argv[1]
+
+	if("https://" not in url and "http://" not in url or "/Anime/" not in url):
+		printClr(url + " is not a valid url!", Color.BOLD, Color.RED)
+		return
+
+	if(requests.head(url).status_code != requests.codes.ok and requests.head(url).status_code != 503):
+		printClr(url + " is not a valid url!", Color.BOLD, Color.RED)
+		return
+
+	dl_path = sys.argv[2]
+
+	if(os.path.isdir(dl_path) == False):
+		printClr(dl_path + " is not a valid directory to download to", Color.BOLD, Color.RED)
+		printError()
+		return
 
 	#begin session
 	sess = requests.Session()
@@ -327,7 +344,6 @@ def main():
 		if verbose:
 			print("Found link: " + js_var_t_href[:-1] + vid_lxml_ele[i].attrib['href'])
 
-
 	DOWNLOAD_URL_X_PATH = "//select[@id='selectQuality']"
 	DOWNLOAD_NAME = "//div[@id='divFileName']/b/following::node()"
 	mu = threading.Lock()
@@ -360,6 +376,26 @@ def main():
 		print vid_links
 
 	if(len(episode_range) > 0):
+		#checks to make sure episode entered is real
+		fst_ln_fnd = False;
+		snd_ln_fnd = False;
+		for ln in vid_links:
+			frmt_ln = ln.split("/")[-1].split("?")[0]
+			if(episode_range[0] in frmt_ln):
+				fst_ln_fnd = True
+			if(episode_range[1] in frmt_ln):
+				snd_ln_fnd = True
+			if(fst_ln_fnd and snd_ln_fnd):
+				break;
+
+		if(not fst_ln_fnd):
+			printClr(episode_range[0] + " is not a valid episode", Color.BOLD, Color.RED)
+			return
+
+		if(not snd_ln_fnd):
+			printClr(episode_range[1] + " is not a valid episode", Color.BOLD, Color.RED)
+			return
+
 		rm_links = []
 
 		if verbose:
@@ -367,8 +403,6 @@ def main():
 		for ln in vid_links:
 			frmt_ln = ln.split("/")[-1].split("?")[0]
 			if(episode_range[0] not in frmt_ln):
-				if verbose:
-					print("Removed link: " + ln)
 				rm_links.append(ln)
 			else:
 				break
