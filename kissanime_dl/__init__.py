@@ -161,7 +161,7 @@ def printError():
 	print("    Val is the number of threads to SEARCH for the download links")
 	print("    Defaults to 5")
 	print("    Downloading the files uses one thread per file and CANNOT be changed")
-	printClr("An optional argument is help", Color.BOLD)
+	printClr("An optional argument is --help", Color.BOLD)
 
 def main():
 	#beginning clock
