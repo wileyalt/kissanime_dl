@@ -473,5 +473,3 @@ def main():
 	end_time = time.time()
 	printClr("Downloaded " + str(len(vid_links) ) + "files at " + dl_path, Color.BOLD, Color.GREEN)
 	printClr("Elapsed time: " + str(timedelta(seconds = (end_time - start_time) ) ), Color.BOLD)
-
-main()

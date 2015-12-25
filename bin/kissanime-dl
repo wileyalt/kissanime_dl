@@ -1,0 +1,6 @@
+#!/usr/bin/env python
+
+import kissanime_dl
+
+if __name__ == '__main__':
+	kissanime_dl.main()
