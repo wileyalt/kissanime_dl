@@ -420,10 +420,12 @@ def main():
 				frmt_ln = ln.split("/")[-1].split("?")[0]
 				if(episode_range[0] not in frmt_ln):
 					rm_links.append(ln)
+				else:
+					break
 
 		for ln in rm_links:
 			if verbose:
-				print("Removed link: " + ln)
+				print("Removing link: " + ln)
 			vid_links.remove(ln)
 
 
