@@ -1,7 +1,7 @@
 #kissanime_dl
 
 
-Downloads all mp4s from a kiss_anime mastersite!
+Downloads all mp4s from a kissanime mastersite!
 (kissanime.to/Anime/*)
 
 
@@ -11,12 +11,19 @@ lxml
 requests
 
 
+#Installation
+```
+pip install kissanime_dl
+```
+
+
 #Usage:
+```
 First argument: the url to the kissanime.to/Anime/* page.
 
 Second argument: the path to download files to
 
-Optional argument:
+Optional arguments:
 
 --verbose: Verbose output
 
@@ -27,3 +34,4 @@ Optional argument:
 --max_threads=VAL: Sets the max_threads to search for the download urls. The threads for the actual downloading is not affected. The actual downloading uses one thread per file
 
 --help: Prints help
+```
