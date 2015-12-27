@@ -19,6 +19,7 @@ pip install kissanime_dl
 
 #Usage:
 ```
+Type into shell:
 kissanime-dl URL PATH_TO_DOWNLOAD OPT_ARGS
 
 First argument: the url to the kissanime.to/Anime/* page.
