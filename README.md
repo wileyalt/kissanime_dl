@@ -19,6 +19,10 @@ pip install kissanime_dl
 
 #Usage:
 ```
+
+Type into shell:
+kissanime-dl URL PATH_TO_DOWNLOAD OPT_ARGS
+
 First argument: the url to the kissanime.to/Anime/* page. It can also be "update" which will download any videos not downloaded into the folder. 
 "update" can only be used if kissanime_dl has been run in that directory and has generated a history file
 
