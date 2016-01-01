@@ -5,10 +5,10 @@ import platform
 import os.path
 import Queue
 import re
-import Queue
 import threading
 import time
 import shutil
+import json
 from urlparse import urlparse
 from datetime import timedelta
 
@@ -121,7 +121,7 @@ def wrap(string):
 
 	if(len(string) % 4):
 		print("Wrap failed")
-		return
+		raise ValueError("Wrap failed")
 
 	buff = fromUTF8(string)
 	position = 0
@@ -150,20 +150,46 @@ def wrap(string):
 	return ''.join(result)
 
 def printError():
+	printClr("The first argument is the url or update", Color.BOLD)
+	print("    Update can only be given if kissanime_dl has been run in that directory before")
+	printClr("The second argument is the path to download to", Color.BOLD)
 	printClr("An optional argument is --verbose", Color.BOLD)
 	printClr("An optional argument is --simulate.", Color.BOLD)
 	print("    This simulates finding the links, but doesn't download")
-	printClr("An optional argument is --episode=BEG%OPT_END.", Color.BOLD)
-	print("    If only one number is given, then only that one episode is downloaded")
-	print("    The BEG episode MUST BE the one at the top of the page")
+	printClr("An optional argument is --episode=OPT_BEG%OPT_END.", Color.BOLD)
+	print("    If only OPT_BEG is given WITHOUT '%', only one episode will be downloaded.")
+	print("    If only OPT_BEG is given WITH '%', then all files after OPT_BEG will be downloaded.")
+	print("    If only OPT_END is given WITH '%', then all files before OPT_END will be downloaded.")
+	print("    If OPT_BEG and OPT_END is given, then a range between the two will be downloaded.")
+	print("    '%'' literal needs to be between the two.")
+	print("    OPT_BEG needs to be above OPT_END in terms of the page")
 	print("    Defaults to all")
-	printClr("An optional argument is ---max_threads=VAL.", Color.BOLD)
+	printClr("An optional argument is --max_threads=VAL.", Color.BOLD)
 	print("    Val is the number of threads to SEARCH for the download links")
 	print("    Defaults to 5")
 	print("    Downloading the files uses one thread per file and CANNOT be changed")
+	printClr("An optional argument is --quality=QUAL", Color.BOLD)
+	print("    This sets the quality of the video download")
 	printClr("An optional argument is --help", Color.BOLD)
 
+def getElapsedTime(s_time):
+	end_time = time.time()
+	return str(timedelta(seconds = (end_time - s_time) ) )
+
+# MAIN
 def main():
+	LINK_HISTORY_FILE_NAME = "kissanime_dl_history.json"
+	"""
+	Json data should look like this:
+	[
+	"master_link" : MASTER_LINK,
+	"vid_links" : [VID_LINKS]
+	]
+
+	"""
+	JSON_HIS_MASTER_LINK_KEY = "master_link"
+	JSON_HIS_VID_LINKS_KEY = "vid_links"
+
 	#beginning clock
 	start_time = time.time()
 	plat = platform.system()
@@ -171,8 +197,13 @@ def main():
 
 	verbose = False
 	simulate = False
+
 	episode_range = []
+	episode_range_single = False
+
 	MAX_THREADS = 5
+	link_history_data = {}
+	quality_txt = ""
 
 	#optional args
 	if(len(sys.argv) > 3):
@@ -186,26 +217,41 @@ def main():
 				printError()
 				return
 			elif(psd_arg.split('=')[0] == "--episode"):
-				eps = psd_arg.split('=')[1].replace(' ', '').split('%')
+				eps = psd_arg.split('=')[1].replace(' ', '')
 				first = ''
 				second = ''
-				if(len(eps) == 1):
-					first = eps[0]
-					if(first == ''):
-						printClr("Error: The first argument cannot be blank", Color.BOLD, Color.RED)
-						printError()
-						return
-
+				if('%' not in eps):
+					episode_range_single = True
+					first = eps
+					second = "000"
 					while(len(first) < 3):
 						first = "0" + first
+				else:
 
-				elif(len(eps) == 2):
-					first = eps[0]
-					while(len(first) < 3):
-						first = "0" + first
-					second = eps[1]
-					while(len(second) < 3):
-						second = "0" + second
+					eps = eps.split('%')
+					if(len(eps) == 1):
+						first = eps[0]
+						if(first == ''):
+							printClr("Error: The arguments cannot be blank", Color.BOLD, Color.RED)
+							printError()
+							return
+
+						while(len(first) < 3):
+							first = "0" + first
+						second = "000"
+
+					elif(len(eps) == 2):
+						first = eps[0]
+						while(len(first) < 3):
+							first = "0" + first
+						second = eps[1]
+						while(len(second) < 3):
+							second = "0" + seconds
+
+						if(first == "000" and second == "000"):
+							printClr("Error: Both arguments cannot be blank", Color.BOLD, Color.RED)
+							printError()
+							return
 
 				EPS_PREFIX = "Episode-"
 				if(EPS_PREFIX not in first and len(first) == 3):
@@ -215,8 +261,10 @@ def main():
 
 				episode_range = [first, second]
 
-				if verbose:
+				if(verbose and not episode_range_single):
 					print("Searching for episodes between: " + episode_range[0] + " and " + episode_range[1])
+				elif(verbose and episode_range_single):
+					print("Searching for episode: " + episode_range[0])
 
 			elif(psd_arg.split('=')[0] == "--max_threads"):
 				str_val = psd_arg.split('=')[1]
@@ -230,6 +278,15 @@ def main():
 					printClr("Error: Cannot have max threads less than 1", Color.BOLD, Color.RED)
 					return
 
+			elif(psd_arg.split('=')[0] == "--quality"):
+				quality_txt = psd_arg.split('=')[1]
+				if(not quality_txt.isdigit() and quality_txt[:-1] is not 'p'):
+					printClr("Error: " + quality_txt + " is not a numerical value", Color.BOLD, Color.RED)
+					return
+
+				if(quality_txt.isdigit() and quality_txt[:-1] is not 'p'):
+					quality_txt = quality_txt + 'p'
+
 			else:
 				printClr("Unknown argument: " + sys.argv[i], Color.BOLD, Color.RED)
 				printError()
@@ -240,27 +297,52 @@ def main():
 		printError()
 		return
 
+	#gets first arg
 	url = sys.argv[1]
 
-	if("https://" not in url and "http://" not in url or "/Anime/" not in url):
-		printClr(url + " is not a valid url!", Color.BOLD, Color.RED)
-		return
+	dl_path = os.path.abspath(sys.argv[2])
 
-	if(requests.head(url).status_code != requests.codes.ok and requests.head(url).status_code != 503):
-		printClr(url + " is not a valid url!", Color.BOLD, Color.RED)
-		return
-
-	dl_path = sys.argv[2]
+	PATH_TO_HISTORY = dl_path + "/" + LINK_HISTORY_FILE_NAME
 
 	if(os.path.isdir(dl_path) == False):
-		printClr(dl_path + " is not a valid directory to download to", Color.BOLD, Color.RED)
+		printClr(dl_path + " is not a valid directory", Color.BOLD, Color.RED)
 		printError()
 		return
+
+	if(url != "update"):
+
+		if("https://" not in url and "http://" not in url or "/Anime/" not in url):
+			printClr(url + " is not a valid url!", Color.BOLD, Color.RED)
+			return
+
+		if(requests.head(url).status_code != requests.codes.ok and requests.head(url).status_code != 503):
+			printClr(url + " is not a valid url!", Color.BOLD, Color.RED)
+			return
+	else:
+		#grab the urls
+		#assumes first arg is update
+
+		#check if file exists
+		if(not os.path.isfile(PATH_TO_HISTORY) ):
+			printClr("Cannot update videos when kissanime_dl has never been run at " + dl_path, Color.BOLD, Color.RED)
+			printClr("Make sure that " + LINK_HISTORY_FILE_NAME + " exists at that directory", Color.BOLD)
+			return
+
+		#open that file
+		with open(PATH_TO_HISTORY) as f:
+			link_history_data = json.load(f)
+
+		#set url to master link
+		url = link_history_data[JSON_HIS_MASTER_LINK_KEY]
+
+		if(verbose):
+			print("Found url from history: " + url)
+
 
 	#begin session
 	sess = requests.Session()
 	sess.keep_alive = True
-	r = sess.get(url)
+	r = sess.get(url, timeout=30.0)
 	if verbose:
 		print("Started session at " + url)
 	tree = html.fromstring(r.content)
@@ -302,7 +384,7 @@ def main():
 	var_complex_op = [stri+";" for stri in strip_script[15].split(";")]
 
 	for string in var_complex_op[:-2]:
-		if unkwn_var_name not in string:
+		if(unkwn_var_name not in string):
 			continue
 		else:
 			eval_phrase = "val_unkwn_var" + findBetween(string, unkwn_var_name, "=") + "(" + convJStoPy(findBetween(string, '=', ';') ) + ")"
@@ -319,13 +401,14 @@ def main():
 	}
 
 	print("Waiting for authentication...")
+	print("Should take about 4 seconds")
 	#wait for 4 sec
 	time.sleep(4)
 
 	URL_SEND_PAYLOAD_TO = "https://kissanime.to/cdn-cgi/l/chk_jschl"
-	sess.get(URL_SEND_PAYLOAD_TO, params=payload)
+	sess.get(URL_SEND_PAYLOAD_TO, params=payload, timeout=30.0)
 
-	r = sess.get(url)
+	r = sess.get(url, timeout=30.0)
 
 	URL_ERROR_URL = "https://kissanime.to/Error"
 	if(r.url == URL_ERROR_URL):
@@ -333,6 +416,8 @@ def main():
 		print("Check your url and try again")
 		return
 
+
+	#ASSUMING PAGE IS LOADED STARTING HERE
 	tree = html.fromstring(r.content)
 
 	LINK_TABLE_X_PATH = "//table[@class='listing']/tr/td/a"
@@ -341,21 +426,35 @@ def main():
 	vid_links = []
 	for i in range(len(vid_lxml_ele) ):
 		vid_links.append(js_var_t_href[:-1] + vid_lxml_ele[i].attrib['href'])
-		if verbose:
+		if(verbose):
 			print("Found link: " + js_var_t_href[:-1] + vid_lxml_ele[i].attrib['href'])
 
-	DOWNLOAD_URL_X_PATH = "//select[@id='selectQuality']"
-	DOWNLOAD_NAME = "//div[@id='divFileName']/b/following::node()"
 	mu = threading.Lock()
 	print_mu = threading.Lock()
 
+	DOWNLOAD_URL_X_PATH = "//select[@id='selectQuality']"
+	DOWNLOAD_URL_X_PATH_DEFAULT = DOWNLOAD_URL_X_PATH + "/option[1]/@value" 
+	DOWNLOAD_NAME = "//div[@id='divFileName']/b/following::node()"
+	if(quality_txt != ""):
+		DOWNLOAD_URL_X_PATH = DOWNLOAD_URL_X_PATH + "/option[normalize-space(text() ) = \'" + quality_txt + "\']/@value"
+	else:
+		#defaults to highest quality
+		DOWNLOAD_URL_X_PATH = DOWNLOAD_URL_X_PATH_DEFAULT
+
+	#arr of all the escape chars
 	escapes = ''.join([chr(char) for char in range(1, 32)])
+
 	def getDLUrls(queuee, links, ses):
+		#lets make a local copy
+		dl_url_x_path = DOWNLOAD_URL_X_PATH
+
 		for ur in links:
 			mu.acquire()
 			temp_r = ses.get(ur)
 			mu.release()
 			temp_tree = html.fromstring(temp_r.content)
+
+			#name
 			raw_data = temp_tree.xpath(DOWNLOAD_NAME)
 			if(len(raw_data) == 0):
 				print("Failed to grab url")
@@ -365,17 +464,27 @@ def main():
 				return
 			#             NAME                            DOWNLOAD_URL
 			format_txt = raw_data[0].replace(" ", '').translate(None, escapes)
-			queuee.put([format_txt, wrap(temp_tree.xpath(DOWNLOAD_URL_X_PATH)[0].value_options[0])])
-			if verbose:
+
+			#no quality found
+			if(len(temp_tree.xpath(dl_url_x_path) ) == 0 and quality_txt != ""):
+				printClr("Quality " + quality_txt + " is not found", Color.RED, Color.BOLD)
+				printClr("Defaulting to highest quality", Color.BOLD)
+				dl_url_x_path = DOWNLOAD_URL_X_PATH_DEFAULT
+
+			queuee.put([format_txt, wrap(temp_tree.xpath(dl_url_x_path)[0] )])
+			if(verbose):
 				print_mu.acquire()
-				print("Found download link: " + wrap(temp_tree.xpath(DOWNLOAD_URL_X_PATH)[0].value_options[0] ) )
+				print("Found download link: " + wrap(temp_tree.xpath(dl_url_x_path)[0] ) )
 				print("Found file name: " + format_txt)
 				print_mu.release()
 
-	if verbose:
-		print vid_links
+	if(verbose):
+		print("Vidlinks: ")
+		print(vid_links)
 
 	if(len(episode_range) > 0):
+		EPISODE_NULL_TITLE = "Episode-000"
+
 		#checks to make sure episode entered is real
 		fst_ln_fnd = False;
 		snd_ln_fnd = False;
@@ -388,11 +497,11 @@ def main():
 			if(fst_ln_fnd and snd_ln_fnd):
 				break;
 
-		if(not fst_ln_fnd):
+		if(not fst_ln_fnd and episode_range[0] != EPISODE_NULL_TITLE):
 			printClr(episode_range[0] + " is not a valid episode", Color.BOLD, Color.RED)
 			return
 
-		if(not snd_ln_fnd):
+		if(not snd_ln_fnd and episode_range[1] != EPISODE_NULL_TITLE and not episode_range_single):
 			printClr(episode_range[1] + " is not a valid episode", Color.BOLD, Color.RED)
 			return
 
@@ -400,14 +509,16 @@ def main():
 
 		if verbose:
 			print("Removing episodes")
-		for ln in vid_links:
-			frmt_ln = ln.split("/")[-1].split("?")[0]
-			if(episode_range[0] not in frmt_ln):
-				rm_links.append(ln)
-			else:
-				break
 
-		if(episode_range[1] != ''):
+		if(episode_range[0] != EPISODE_NULL_TITLE and episode_range_single == False):
+			for ln in vid_links:
+				frmt_ln = ln.split("/")[-1].split("?")[0]
+				if(episode_range[0] not in frmt_ln):
+					rm_links.append(ln)
+				else:
+					break
+
+		if(episode_range[1] != EPISODE_NULL_TITLE and episode_range_single == False):
 			for ln in reversed(vid_links):
 				frmt_ln = ln.split("/")[-1].split("?")[0]
 				if(episode_range[1] not in frmt_ln):
@@ -415,19 +526,34 @@ def main():
 				else:
 					break
 
-		elif(episode_range[1] == ''):
-			for ln in reversed(vid_links):
-				frmt_ln = ln.split("/")[-1].split("?")[0]
-				if(episode_range[0] not in frmt_ln):
+		if(episode_range_single == True):
+			for ln in vid_links:
+				if(episode_range[0] not in ln):
 					rm_links.append(ln)
-				else:
-					break
 
 		for ln in rm_links:
-			if verbose:
+			if(verbose):
 				print("Removing link: " + ln)
 			vid_links.remove(ln)
 
+
+	#assumes first arg is update
+	#checks to see if link_history_data has data in it
+	if(len(link_history_data) != 0):
+		for lnk in link_history_data[JSON_HIS_VID_LINKS_KEY]:
+			if(lnk in vid_links):
+				if(verbose):
+					print("Removing link: " + lnk)
+				#removes link if file is in update
+				vid_links.remove(lnk)
+
+	if(len(vid_links) == 0):
+		if(len(link_history_data) != 0):
+			printClr("No video updates found!", Color.BOLD, Color.RED)
+			return
+
+		printClr("No video links are found!", Color.BOLD, Color.RED)
+		return
 
 	if(len(vid_links) < MAX_THREADS):
 		MAX_THREADS = len(vid_links)
@@ -436,29 +562,29 @@ def main():
 	dl_urls = Queue.Queue()
 	thrs = []
 	for i in range(MAX_THREADS):
-		if verbose:
+		if(verbose):
 			print("Creating Thread " + str(i) )
 		loc_data = []
 		if(i == MAX_THREADS - 1):
 			loc_data = vid_links[(i * CHUNK_SIZE) : ]
 		else:
 			loc_data = vid_links[(i * CHUNK_SIZE) : (i * CHUNK_SIZE + CHUNK_SIZE)]
-		if verbose:
+		if(verbose):
 			print(loc_data)
 		thrs.append(threading.Thread(target = getDLUrls, args = (dl_urls, loc_data, sess) ) )
-		thrs[i].Daemon = True
+		thrs[i].daemon = True
 		thrs[i].start()
 
-	for i in range(MAX_THREADS):
-		thrs[i].join()
+	while(threading.active_count() > 1):
+		#wait one tenth of a sec
+		time.sleep(0.1)
 
 	del thrs
 
 	if(simulate):
-		end_time = time.time()
 		print("Finished simulation")
 		printClr("Found " + str(len(vid_links) ) + " links", Color.BOLD, Color.GREEN)
-		printClr("Elapsed time: " + str(timedelta(seconds = (end_time - start_time) ) ), Color.BOLD)
+		printClr("Elapsed time: " + getElapsedTime(start_time), Color.BOLD)
 		return
 
 	thrs = []
@@ -466,12 +592,36 @@ def main():
 	#more threads to start downloading
 	for i in range(len(vid_links) ):
 		thrs.append(threading.Thread(target = downloadFile, args = (dl_urls, dl_path) ) )
-		thrs[i].Daemon = True
+		thrs[i].daemon = True
 		thrs[i].start()
 
-	for th in thrs:
-		th.join()
+	while(threading.active_count() > 1):
+		#wait one tenth of a sec
+		time.sleep(0.1)
 
-	end_time = time.time()
-	printClr("Downloaded " + str(len(vid_links) ) + "files at " + dl_path, Color.BOLD, Color.GREEN)
-	printClr("Elapsed time: " + str(timedelta(seconds = (end_time - start_time) ) ), Color.BOLD)
+	#lets write that history file!
+	if(verbose):
+		print("Creating history file")
+
+	json_his_data = {JSON_HIS_MASTER_LINK_KEY:url}
+	#not update
+	if(len(link_history_data) == 0):
+		json_his_data[JSON_HIS_VID_LINKS_KEY] = vid_links
+	else:
+		#is update
+
+		temp_data = link_history_data[JSON_HIS_VID_LINKS_KEY]
+		for lnk in vid_links:
+			temp_data.append(lnk)
+
+		json_his_data[JSON_HIS_VID_LINKS_KEY] = temp_data
+
+	if(verbose):
+		print("Writing json file")
+
+	with open(PATH_TO_HISTORY, 'wb') as f_data:
+		json.dump(json_his_data, f_data)
+
+
+	printClr("Downloaded " + str(len(vid_links) ) + " files at " + dl_path, Color.BOLD, Color.GREEN)
+	printClr("Elapsed time: " + getElapsedTime(start_time), Color.BOLD)

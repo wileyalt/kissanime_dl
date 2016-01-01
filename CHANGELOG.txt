@@ -1,0 +1,4 @@
+1.2.0:
+	Added quality argument.
+	Better episode select.
+	Added update.
