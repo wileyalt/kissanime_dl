@@ -246,7 +246,7 @@ def main():
 							first = "0" + first
 						second = eps[1]
 						while(len(second) < 3):
-							second = "0" + seconds
+							second = "0" + second
 
 						if(first == "000" and second == "000"):
 							printClr("Error: Both arguments cannot be blank", Color.BOLD, Color.RED)
