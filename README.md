@@ -1,4 +1,4 @@
-#kissanime_dl or kissanime-dl
+#kissanime-dl
 
 
 Downloads all mp4s from a kissanime mastersite!
