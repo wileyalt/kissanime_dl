@@ -23,6 +23,10 @@ pip install kissanime_dl
 Type into shell:
 kissanime-dl URL PATH_TO_DOWNLOAD OPT_ARGS
 
+####
+MAKE SURE THAT kissanime_dl RUNS IN SEPARATE DIRECTORIES FOR DIFFERENT URLS, OR ELSE UPDATE WILL BE SCREWY
+####
+
 First argument: the url to the kissanime.to/Anime/* page. It can also be "update" which will download any videos not downloaded into the folder. 
 "update" can only be used if kissanime_dl has been run in that directory and has generated a history file
 
@@ -50,4 +54,25 @@ Optional arguments:
 	If the quality is not found, the highest one is downloaded
 
 --help: Prints help
+```
+
+
+#Example Usage
+```
+
+#Initial run
+kissanime-dl https://kissanime.to/Anime/NHK-ni-Youkoso ~/Videos/NHK
+
+#To update videos
+kissanime-dl update ~/Videos/NHK
+
+#Download one episode
+kissanime-dl https://kissanime.to/Anime/NHK-ni-Youkoso ~/Videos/NHK --episode=5
+
+#Download range of episodes
+kissanime-dl https://kissanime.to/Anime/NHK-ni-Youkoso ~/Videos/NHK --episode=20%4
+
+#Choose quality
+kissanime-dl https://kissanime.to/Anime/NHK-ni-Youkoso ~/Videos/NHK --quality=1080
+
 ```
