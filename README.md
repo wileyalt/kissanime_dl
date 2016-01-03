@@ -53,6 +53,13 @@ Optional arguments:
 --quality=QUAL: Sets the quality of the downloaded video.
 	If the quality is not found, the highest one is downloaded
 
+--txtlinks
+	Doesn't downloads the videos, but prints the direct video urls into a txt file.
+
+--forcehistory
+	Forces a history to be written with the given episodes.
+	This is good for manually setting files you don't want to download when updating
+
 --help: Prints help
 ```
 

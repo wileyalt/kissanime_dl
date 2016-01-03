@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='kissanime_dl',
-	version='1.2.1',
+	version='1.3.1',
 	description='Easy downloading .mp4s from kissanime.to',
 	url="https://github.com/wileyyugioh/kissanime_dl",
 	author='Wiley Y.',

@@ -46,8 +46,7 @@ NAME = 0
 DOWNLOAD_URL = 1
 
 console_mu = threading.Lock()
-def downloadFile(queue, dl_path):
-	url = queue.get()
+def downloadFile(url, dl_path):
 	dl_name = unicode(url[NAME])
 	if(len(dl_name) > 252):
 		dl_name = dl_name[:252]
@@ -170,6 +169,11 @@ def printError():
 	print("    Downloading the files uses one thread per file and CANNOT be changed")
 	printClr("An optional argument is --quality=QUAL", Color.BOLD)
 	print("    This sets the quality of the video download")
+	printClr("An optional argument is --txtlinks", Color.BOLD)
+	print("    This creates a txt file with the links to the videos, but does not download them")
+	printClr("An optional argument is --forcehistory", Color.BOLD)
+	print("    Forces a history to be written with the given episodes.")
+	print("    This is good for manually setting files you don't want to download when updating")
 	printClr("An optional argument is --help", Color.BOLD)
 
 def getElapsedTime(s_time):
@@ -197,6 +201,8 @@ def main():
 
 	verbose = False
 	simulate = False
+	txtlinks = False
+	forcehistory = False
 
 	episode_range = []
 	episode_range_single = False
@@ -213,6 +219,8 @@ def main():
 				verbose = True
 			elif(psd_arg.split('=')[0] == "--simulate"):
 				simulate = True
+			elif(psd_arg.split('=')[0] == "--txtlinks"):
+				txtlinks = True
 			elif(psd_arg.split('=')[0] == "--help"):
 				printError()
 				return
@@ -286,6 +294,9 @@ def main():
 
 				if(quality_txt.isdigit() and quality_txt[:-1] is not 'p'):
 					quality_txt = quality_txt + 'p'
+
+			elif(psd_arg.split('=')[0] == "--forcehistory"):
+				forcehistory = True
 
 			else:
 				printClr("Unknown argument: " + sys.argv[i], Color.BOLD, Color.RED)
@@ -416,7 +427,11 @@ def main():
 		print("Check your url and try again")
 		return
 
+	if(r.status_code != requests.codes.ok):
+		printClr("Error: HTTP RESPONSE CODE: " + str(r.status_code), Color.BOLD, Color.RED)
+		return
 
+	printClr("Success!", Color.BOLD, Color.GREEN)
 	#ASSUMING PAGE IS LOADED STARTING HERE
 	tree = html.fromstring(r.content)
 
@@ -443,40 +458,6 @@ def main():
 
 	#arr of all the escape chars
 	escapes = ''.join([chr(char) for char in range(1, 32)])
-
-	def getDLUrls(queuee, links, ses):
-		#lets make a local copy
-		dl_url_x_path = DOWNLOAD_URL_X_PATH
-
-		for ur in links:
-			mu.acquire()
-			temp_r = ses.get(ur)
-			mu.release()
-			temp_tree = html.fromstring(temp_r.content)
-
-			#name
-			raw_data = temp_tree.xpath(DOWNLOAD_NAME)
-			if(len(raw_data) == 0):
-				print("Failed to grab url")
-				if verbose:
-					print(temp_r.content)
-				print("You may have to open a browser and manually verify capcha")
-				return
-			#             NAME                            DOWNLOAD_URL
-			format_txt = raw_data[0].replace(" ", '').translate(None, escapes)
-
-			#no quality found
-			if(len(temp_tree.xpath(dl_url_x_path) ) == 0 and quality_txt != ""):
-				printClr("Quality " + quality_txt + " is not found", Color.RED, Color.BOLD)
-				printClr("Defaulting to highest quality", Color.BOLD)
-				dl_url_x_path = DOWNLOAD_URL_X_PATH_DEFAULT
-
-			queuee.put([format_txt, wrap(temp_tree.xpath(dl_url_x_path)[0] )])
-			if(verbose):
-				print_mu.acquire()
-				print("Found download link: " + wrap(temp_tree.xpath(dl_url_x_path)[0] ) )
-				print("Found file name: " + format_txt)
-				print_mu.release()
 
 	if(verbose):
 		print("Vidlinks: ")
@@ -558,6 +539,41 @@ def main():
 	if(len(vid_links) < MAX_THREADS):
 		MAX_THREADS = len(vid_links)
 
+	def getDLUrls(queuee, links, ses):
+		#lets make a local copy
+		dl_url_x_path = DOWNLOAD_URL_X_PATH
+
+		for ur in links:
+			mu.acquire()
+			temp_r = ses.get(ur)
+			mu.release()
+			temp_tree = html.fromstring(temp_r.content)
+
+			#name
+			raw_data = temp_tree.xpath(DOWNLOAD_NAME)
+			if(len(raw_data) == 0):
+				printClr("Failed to grab url at " + ur, Color.RED, Color.BOLD)
+				if(verbose):
+					print(temp_r.content)
+				if(temp_r.status_code == requests.codes.ok):
+					printClr("You may have to open a browser and manually verify capcha", Color.BOLD)
+				continue
+			#             NAME                            DOWNLOAD_URL
+			format_txt = raw_data[0].replace(" ", '').translate(None, escapes)
+
+			#no quality found
+			if(len(temp_tree.xpath(dl_url_x_path) ) == 0 and quality_txt != ""):
+				printClr("Quality " + quality_txt + " is not found", Color.RED, Color.BOLD)
+				printClr("Defaulting to highest quality", Color.BOLD)
+				dl_url_x_path = DOWNLOAD_URL_X_PATH_DEFAULT
+
+			queuee.put([format_txt, wrap(temp_tree.xpath(dl_url_x_path)[0]), ur])
+			if(verbose):
+				print_mu.acquire()
+				print("Found download link: " + wrap(temp_tree.xpath(dl_url_x_path)[0] ) )
+				print("Found file name: " + format_txt)
+				print_mu.release()
+
 	CHUNK_SIZE = len(vid_links) / MAX_THREADS
 	dl_urls = Queue.Queue()
 	thrs = []
@@ -581,17 +597,67 @@ def main():
 
 	del thrs
 
+	#lets clean up
+	del tree
+	del vid_lxml_ele
+	del r
+	del vid_links
+
+	dl_urls = [item for item in dl_urls.queue]
+
+
+	PARENT_URL = 2
+	def writeHistory(urls_arr):
+		#lets write that history file!
+		if(verbose):
+			print("Creating history file")	
+
+		json_his_data = {JSON_HIS_MASTER_LINK_KEY:url}
+
+		#not update
+		if(len(link_history_data) == 0):
+			json_his_data[JSON_HIS_VID_LINKS_KEY] = urls_arr
+		else:
+			#is update
+			temp_data = link_history_data[JSON_HIS_VID_LINKS_KEY]
+			for lnk in urls_arr:
+				temp_data.append(urls_arr)
+
+			json_his_data[JSON_HIS_VID_LINKS_KEY] = temp_data
+
+		if(verbose):
+			print("Writing json file")
+
+		with open(PATH_TO_HISTORY, 'wb') as f_data:
+			json.dump(json_his_data, f_data)
+
+	if(forcehistory):
+		writeHistory([lnk[PARENT_URL] for lnk in dl_urls])
+
+	if(txtlinks):
+		print("Finished grabbing download links")
+		FILE_NAME = "Links.txt"
+		FILE_PATH = dl_path + "/" + FILE_NAME
+
+		with open(FILE_PATH, 'wb') as txt_data:
+			for item in dl_urls:
+				txt_data.write("%s\n" % item[DOWNLOAD_URL])
+
+		printClr("Found " + str(len(dl_urls) ) + " links", Color.BOLD, Color.GREEN)
+		printClr("Elapsed time: " + getElapsedTime(start_time), Color.BOLD)
+		return
+
 	if(simulate):
 		print("Finished simulation")
-		printClr("Found " + str(len(vid_links) ) + " links", Color.BOLD, Color.GREEN)
+		printClr("Found " + str(len(dl_urls) ) + " links", Color.BOLD, Color.GREEN)
 		printClr("Elapsed time: " + getElapsedTime(start_time), Color.BOLD)
 		return
 
 	thrs = []
 
 	#more threads to start downloading
-	for i in range(len(vid_links) ):
-		thrs.append(threading.Thread(target = downloadFile, args = (dl_urls, dl_path) ) )
+	for dl_sing_url in dl_urls:
+		thrs.append(threading.Thread(target = downloadFile, args = (dl_sing_url, dl_path) ) )
 		thrs[i].daemon = True
 		thrs[i].start()
 
@@ -599,29 +665,9 @@ def main():
 		#wait one tenth of a sec
 		time.sleep(0.1)
 
-	#lets write that history file!
-	if(verbose):
-		print("Creating history file")
+	if(not writeHistory):
+		#History is already written!
+		writeHistory([lnk[PARENT_URL] for lnk in dl_urls])
 
-	json_his_data = {JSON_HIS_MASTER_LINK_KEY:url}
-	#not update
-	if(len(link_history_data) == 0):
-		json_his_data[JSON_HIS_VID_LINKS_KEY] = vid_links
-	else:
-		#is update
-
-		temp_data = link_history_data[JSON_HIS_VID_LINKS_KEY]
-		for lnk in vid_links:
-			temp_data.append(lnk)
-
-		json_his_data[JSON_HIS_VID_LINKS_KEY] = temp_data
-
-	if(verbose):
-		print("Writing json file")
-
-	with open(PATH_TO_HISTORY, 'wb') as f_data:
-		json.dump(json_his_data, f_data)
-
-
-	printClr("Downloaded " + str(len(vid_links) ) + " files at " + dl_path, Color.BOLD, Color.GREEN)
+	printClr("Downloaded " + str(len(dl_urls) ) + " files at " + dl_path, Color.BOLD, Color.GREEN)
 	printClr("Elapsed time: " + getElapsedTime(start_time), Color.BOLD)
