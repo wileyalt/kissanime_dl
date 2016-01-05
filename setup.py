@@ -5,7 +5,7 @@ with open("README.md", "rb") as f:
 	long_descr = f.read().decode("utf-8")
 
 setup(name='kissanime_dl',
-	version='1.3.1',
+	version='1.4.0',
 	description='Easy downloading .mp4s from kissanime.to',
 	long_description= long_descr,
 	url="https://github.com/wileyyugioh/kissanime_dl",
