@@ -5,10 +5,10 @@ import platform
 import os.path
 try:
 	#python2
-	import Queue
+	from Queue import Queue
 except ImportError:
 	#python3
-	import queue
+	from queue import Queue
 
 import re
 import threading
