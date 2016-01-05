@@ -12,8 +12,55 @@ requests
 
 
 #Installation
+##*nix or OSX:
 ```
 pip install kissanime_dl
+```
+
+#Windows:
+
+Windows is a tricky one. First, go to
+
+http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
+
+and download the proper lxml wheel.
+
+Then, type
+```
+pip install PATH_LXML
+```
+where PATH_LXML is the path to the lxml wheel you downloaded.
+
+Then:
+```
+pip install kissanime_dl
+```
+
+**BUT WAIT, THERE'S MORE**
+
+Due to a bug in pip, the script it generates is broken, and needs to be manually fixed.
+
+Go to 
+```
+C:\Users\NAME\appdata\local\programs\python\pythonXX\Scripts
+```
+and there should be a file named
+```
+kissanime-dl-script.py
+```
+open it in a text editor and change
+```
+#!LONG, LONG, PATH
+```
+to 
+```
+#!"LONG, LONG, PATH"
+```
+This is because spaces in the path name screw everything up, and that bug in pip still hasn't been fixed.
+
+Everything should be installed properly, and this can be verified by typing into cmd:
+```
+kissanime-dl
 ```
 
 
