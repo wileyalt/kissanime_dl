@@ -21,7 +21,7 @@ try:
 	from urlparse import urlparse
 except ImportError:
 	#python3
-	from urllib import parse
+	from urllib.parse import urlparse
 
 from datetime import timedelta
 
