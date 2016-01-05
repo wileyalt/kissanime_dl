@@ -28,6 +28,10 @@ from datetime import timedelta
 import requests
 from lxml import html
 
+#GOTTA GET THAT VERSION
+#Get python version
+PYTHON_VER = sys.version_info[0]
+
 #unicode colors!
 class Color:
 	BEG = '\033['
@@ -60,7 +64,14 @@ DOWNLOAD_URL = 1
 
 console_mu = threading.Lock()
 def downloadFile(url, dl_path):
-	dl_name = unicode(url[NAME])
+	#cross version
+	def cVunicode(any):
+		if(PYTHON_VER < 3):
+			return unicode(any)
+		else:
+			return str(any)
+
+	dl_name = cVunicode(url[NAME])
 	if(len(dl_name) > 252):
 		dl_name = dl_name[:252]
 
@@ -91,6 +102,13 @@ def convJStoPy(string):
 def wrap(string):
 	alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
 	lookup = {}
+	#cross version unichr
+	def cVunichr(any):
+		if(PYTHON_VER < 3):
+			return unichr(any)
+		else:
+			return chr(any)
+
 	def fromUTF8(string):
 		pos = -1
 		leng = 0
@@ -142,14 +160,14 @@ def wrap(string):
 	result = ''
 	while(position < leng):
 		if(buff[position] < 128):
-			result += unichr(buff[position])
+			result += cVunichr(buff[position])
 			position += 1
 		elif(buff[position] > 191 and buff[position] < 224):
 			first = ((buff[position] & 31) << 6)
 			position += 1
 			second = (buff[position] & 63)
 			position += 1
-			result += unichr(first | second);
+			result += cVunichr(first | second);
 		else:
 			first = ((buff[position] & 15) << 12)
 			position += 1
@@ -157,7 +175,7 @@ def wrap(string):
 			position += 1
 			third = (buff[position] & 63)
 			position += 1
-			result += unichr(first | second | third)
+			result += cVunichr(first | second | third)
 
 	return ''.join(result)
 
@@ -195,6 +213,7 @@ def getElapsedTime(s_time):
 
 # MAIN
 def main():
+
 	LINK_HISTORY_FILE_NAME = "kissanime_dl_history.json"
 	"""
 	Json data should look like this:
@@ -211,6 +230,7 @@ def main():
 	start_time = time.time()
 	plat = platform.system()
 	print("Platform: " + plat)
+	print("Python Version: " + str(PYTHON_VER) )
 
 	verbose = False
 	simulate = False
@@ -572,7 +592,10 @@ def main():
 					printClr("You may have to open a browser and manually verify capcha", Color.BOLD)
 				continue
 			#             NAME                            DOWNLOAD_URL
-			format_txt = raw_data[0].replace(" ", '').translate(None, escapes)
+			if(PYTHON_VER < 3):
+				format_txt = raw_data[0].replace(" ", '').translate(None, escapes)
+			else:
+				format_txt = raw_data[0].replace(" ", '').translate(str.maketrans(dict.fromkeys(escapes) ) )
 
 			#no quality found
 			if(len(temp_tree.xpath(dl_url_x_path) ) == 0 and quality_txt != ""):
@@ -587,8 +610,8 @@ def main():
 				print("Found file name: " + format_txt)
 				print_mu.release()
 
-	CHUNK_SIZE = len(vid_links) / MAX_THREADS
-	dl_urls = Queue.Queue()
+	CHUNK_SIZE = int(len(vid_links) / MAX_THREADS)
+	dl_urls = Queue()
 	thrs = []
 	for i in range(MAX_THREADS):
 		if(verbose):
@@ -641,20 +664,20 @@ def main():
 		if(verbose):
 			print("Writing json file")
 
-		with open(PATH_TO_HISTORY, 'wb') as f_data:
+		with open(PATH_TO_HISTORY, 'w') as f_data:
 			json.dump(json_his_data, f_data)
-
-	if(forcehistory):
-		writeHistory([lnk[PARENT_URL] for lnk in dl_urls])
 
 	if(txtlinks):
 		print("Finished grabbing download links")
 		FILE_NAME = "Links.txt"
 		FILE_PATH = dl_path + "/" + FILE_NAME
 
-		with open(FILE_PATH, 'wb') as txt_data:
+		if(forcehistory):
+			writeHistory([lnk[PARENT_URL] for lnk in dl_urls])
+
+		with open(FILE_PATH, 'w') as txt_data:
 			for item in dl_urls:
-				txt_data.write("%s\n" % item[DOWNLOAD_URL])
+				txt_data.write(item[DOWNLOAD_URL] + "\n")
 
 		printClr("Found " + str(len(dl_urls) ) + " links", Color.BOLD, Color.GREEN)
 		printClr("Elapsed time: " + getElapsedTime(start_time), Color.BOLD)
@@ -662,6 +685,8 @@ def main():
 
 	if(simulate):
 		print("Finished simulation")
+		if(forcehistory):
+			writeHistory([lnk[PARENT_URL] for lnk in dl_urls])
 		printClr("Found " + str(len(dl_urls) ) + " links", Color.BOLD, Color.GREEN)
 		printClr("Elapsed time: " + getElapsedTime(start_time), Color.BOLD)
 		return
@@ -678,9 +703,7 @@ def main():
 		#wait one tenth of a sec
 		time.sleep(0.1)
 
-	if(not writeHistory):
-		#History is already written!
-		writeHistory([lnk[PARENT_URL] for lnk in dl_urls])
+	writeHistory([lnk[PARENT_URL] for lnk in dl_urls])
 
 	printClr("Downloaded " + str(len(dl_urls) ) + " files at " + dl_path, Color.BOLD, Color.GREEN)
 	printClr("Elapsed time: " + getElapsedTime(start_time), Color.BOLD)
