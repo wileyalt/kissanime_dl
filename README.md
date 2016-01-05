@@ -17,7 +17,7 @@ requests
 pip install kissanime_dl
 ```
 
-#Windows:
+##Windows:
 
 Windows is a tricky one. First, go to
 
@@ -114,19 +114,25 @@ Optional arguments:
 #Example Usage
 ```
 
-#Initial run
+##Initial run
 kissanime-dl https://kissanime.to/Anime/NHK-ni-Youkoso ~/Videos/NHK
 
-#To update videos
+##To update videos
 kissanime-dl update ~/Videos/NHK
 
-#Download one episode
+##Download one episode
 kissanime-dl https://kissanime.to/Anime/NHK-ni-Youkoso ~/Videos/NHK --episode=5
 
-#Download range of episodes
+##Download range of episodes
 kissanime-dl https://kissanime.to/Anime/NHK-ni-Youkoso ~/Videos/NHK --episode=20%4
 
-#Choose quality
+##Choose quality
 kissanime-dl https://kissanime.to/Anime/NHK-ni-Youkoso ~/Videos/NHK --quality=1080
 
+##Make txt file
+kissanime-dl https://kissanime.to/Anime/NHK-ni-Youkoso ~/Videos/NHK --txtlinks
+
+##Force history
+kissanime-dl https://kissanime.to/Anime/NHK-ni-Youkoso ~/Videos/NHK --forcehistory
 ```
+I think you get the picture
