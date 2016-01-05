@@ -19,7 +19,19 @@ pip install kissanime_dl
 
 ##Windows:
 
-Windows is a tricky one. First, go to
+Windows is a tricky one.
+
+Try:
+```
+pip install kissanime_dl
+```
+
+If you get an error like:
+```
+error: Microsoft Visual C++ 10.0 is required (Unable to find vcvarsall.bat)
+```
+
+There are more steps needed. First, go to
 
 http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
 
@@ -31,10 +43,9 @@ pip install PATH_LXML
 ```
 where PATH_LXML is the path to the lxml wheel you downloaded.
 
-Then:
-```
-pip install kissanime_dl
-```
+Then, try to reinstall.
+
+**FOR ALL WINDOWS INSTALLATIONS**
 
 **BUT WAIT, THERE'S MORE**
 
