@@ -694,10 +694,12 @@ def main():
 	thrs = []
 
 	#more threads to start downloading
+	lazy_programming = 0
 	for dl_sing_url in dl_urls:
 		thrs.append(threading.Thread(target = downloadFile, args = (dl_sing_url, dl_path) ) )
-		thrs[i].daemon = True
-		thrs[i].start()
+		thrs[lazy_programming].daemon = True
+		thrs[lazy_programming].start()
+		lazy_programming += 1
 
 	while(threading.active_count() > 1):
 		#wait one tenth of a sec
