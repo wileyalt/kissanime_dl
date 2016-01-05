@@ -3,13 +3,26 @@
 import sys
 import platform
 import os.path
-import Queue
+try:
+	#python2
+	import Queue
+except ImportError:
+	#python3
+	import queue
+
 import re
 import threading
 import time
 import shutil
 import json
-from urlparse import urlparse
+
+try:
+	#python2
+	from urlparse import urlparse
+except ImportError:
+	#python3
+	from urllib import parse
+
 from datetime import timedelta
 
 import requests
