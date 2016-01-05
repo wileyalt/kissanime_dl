@@ -56,7 +56,7 @@ Type in
 pip show kissanime-dl
 ```
 
-and go to that directory, where there should be a file named
+and go up the filesystem to the pythonXX\Scripts directory, where there should be a file named
 ```
 kissanime-dl-script.py
 ```
