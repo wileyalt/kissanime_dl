@@ -51,11 +51,12 @@ Then, try to reinstall.
 
 Due to a bug in pip, the script it generates is broken, and needs to be manually fixed.
 
-Go to 
+Type in 
 ```
-C:\Users\NAME\appdata\local\programs\python\pythonXX\Scripts
+pip show kissanime-dl
 ```
-and there should be a file named
+
+and go to that directory, where there should be a file named
 ```
 kissanime-dl-script.py
 ```
