@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name='kissanime_dl',
-	version='1.4.4',
+	version='1.4.5',
 	description='Easy downloading .mp4s from kissanime.to',
 	url="https://github.com/wileyyugioh/kissanime_dl",
 	author='Wiley Y.',
@@ -9,8 +9,8 @@ setup(name='kissanime_dl',
 	license='MIT',
 	packages=['kissanime_dl'],
 	install_requires=[
-	'requests',
-	'lxml'
+	'requests==2.9.1',
+	'lxml==3.5.0'
 	],
 	zip_safe=False,
 	#Disabled because it doesn't work in windows
