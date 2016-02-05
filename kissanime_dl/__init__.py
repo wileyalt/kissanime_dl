@@ -657,7 +657,7 @@ def main():
 			#is update
 			temp_data = link_history_data[JSON_HIS_VID_LINKS_KEY]
 			for lnk in urls_arr:
-				temp_data.append(urls_arr)
+				temp_data.append(lnk)
 
 			json_his_data[JSON_HIS_VID_LINKS_KEY] = temp_data
 
@@ -666,6 +666,14 @@ def main():
 
 		with open(PATH_TO_HISTORY, 'w') as f_data:
 			json.dump(json_his_data, f_data)
+
+	if(simulate):
+		print("Finished simulation")
+		if(forcehistory):
+			writeHistory([lnk[PARENT_URL] for lnk in dl_urls])
+		printClr("Found " + str(len(dl_urls) ) + " links", Color.BOLD, Color.GREEN)
+		printClr("Elapsed time: " + getElapsedTime(start_time), Color.BOLD)
+		return
 
 	if(txtlinks):
 		print("Finished grabbing download links")
@@ -679,14 +687,6 @@ def main():
 			for item in dl_urls:
 				txt_data.write(item[DOWNLOAD_URL] + "\n")
 
-		printClr("Found " + str(len(dl_urls) ) + " links", Color.BOLD, Color.GREEN)
-		printClr("Elapsed time: " + getElapsedTime(start_time), Color.BOLD)
-		return
-
-	if(simulate):
-		print("Finished simulation")
-		if(forcehistory):
-			writeHistory([lnk[PARENT_URL] for lnk in dl_urls])
 		printClr("Found " + str(len(dl_urls) ) + " links", Color.BOLD, Color.GREEN)
 		printClr("Elapsed time: " + getElapsedTime(start_time), Color.BOLD)
 		return
