@@ -11,6 +11,7 @@ setup(name='kissanime_dl',
 	install_requires=[
 	'requests==2.9.1',
 	'lxml==3.5.0'
+	'js2py==0.35'
 	],
 	zip_safe=False,
 	#Disabled because it doesn't work in windows

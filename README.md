@@ -10,6 +10,8 @@ lxml
 
 requests
 
+js2py
+
 
 #Installation
 ##*nix or OSX:
