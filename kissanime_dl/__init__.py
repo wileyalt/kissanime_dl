@@ -617,6 +617,7 @@ def main():
 	if(len(vid_links) < MAX_THREADS):
 		MAX_THREADS = len(vid_links)
 
+	global dl_url_x_path 
 	dl_url_x_path = DOWNLOAD_URL_X_PATH
 
 	aadecode_mu = threading.Lock()
@@ -660,6 +661,7 @@ def main():
 
 	def getBlogspotUrls(queuee, link, html_str):
 		#lets make a copy
+		global dl_url_x_path
 
 		temp_tree = html.fromstring(html_str)
 		raw_data = temp_tree.xpath(DOWNLOAD_NAME)
