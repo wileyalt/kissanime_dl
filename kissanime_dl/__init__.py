@@ -17,6 +17,7 @@ import threading
 import time
 import shutil
 import json
+import math
 
 try:
 	#python2
@@ -254,13 +255,9 @@ def getElapsedTime(s_time):
 # MAIN
 def main():
 
-	#required
+	#required for py2js
 	sys.setrecursionlimit(4000)
-	#Debugging
-	y = decodeAA(r"ﾟωﾟﾉ= /｀ｍ´）ﾉ ~┻━┻   //*´∇｀*/ ['_']; o=(ﾟｰﾟ)  =_=3; c=(ﾟΘﾟ) =(ﾟｰﾟ)-(ﾟｰﾟ); (ﾟДﾟ) =(ﾟΘﾟ)= (o^_^o)/ (o^_^o);(ﾟДﾟ)={ﾟΘﾟ: '_' ,ﾟωﾟﾉ : ((ﾟωﾟﾉ==3) +'_') [ﾟΘﾟ] ,ﾟｰﾟﾉ :(ﾟωﾟﾉ+ '_')[o^_^o -(ﾟΘﾟ)] ,ﾟДﾟﾉ:((ﾟｰﾟ==3) +'_')[ﾟｰﾟ] }; (ﾟДﾟ) [ﾟΘﾟ] =((ﾟωﾟﾉ==3) +'_') [c^_^o];(ﾟДﾟ) ['c'] = ((ﾟДﾟ)+'_') [ (ﾟｰﾟ)+(ﾟｰﾟ)-(ﾟΘﾟ) ];(ﾟДﾟ) ['o'] = ((ﾟДﾟ)+'_') [ﾟΘﾟ];(ﾟoﾟ)=(ﾟДﾟ) ['c']+(ﾟДﾟ) ['o']+(ﾟωﾟﾉ +'_')[ﾟΘﾟ]+ ((ﾟωﾟﾉ==3) +'_') [ﾟｰﾟ] + ((ﾟДﾟ) +'_') [(ﾟｰﾟ)+(ﾟｰﾟ)]+ ((ﾟｰﾟ==3) +'_') [ﾟΘﾟ]+((ﾟｰﾟ==3) +'_') [(ﾟｰﾟ) - (ﾟΘﾟ)]+(ﾟДﾟ) ['c']+((ﾟДﾟ)+'_') [(ﾟｰﾟ)+(ﾟｰﾟ)]+ (ﾟДﾟ) ['o']+((ﾟｰﾟ==3) +'_') [ﾟΘﾟ];(ﾟДﾟ) ['_'] =(o^_^o) [ﾟoﾟ] [ﾟoﾟ];(ﾟεﾟ)=((ﾟｰﾟ==3) +'_') [ﾟΘﾟ]+ (ﾟДﾟ) .ﾟДﾟﾉ+((ﾟДﾟ)+'_') [(ﾟｰﾟ) + (ﾟｰﾟ)]+((ﾟｰﾟ==3) +'_') [o^_^o -ﾟΘﾟ]+((ﾟｰﾟ==3) +'_') [ﾟΘﾟ]+ (ﾟωﾟﾉ +'_') [ﾟΘﾟ]; (ﾟｰﾟ)+=(ﾟΘﾟ); (ﾟДﾟ)[ﾟεﾟ]='\\'; (ﾟДﾟ).ﾟΘﾟﾉ=(ﾟДﾟ+ ﾟｰﾟ)[o^_^o -(ﾟΘﾟ)];(oﾟｰﾟo)=(ﾟωﾟﾉ +'_')[c^_^o];(ﾟДﾟ) [ﾟoﾟ]='\"';(ﾟДﾟ) ['_'] ( (ﾟДﾟ) ['_'] (ﾟεﾟ+(ﾟДﾟ)[ﾟoﾟ]+ (ﾟДﾟ)[ﾟεﾟ]+(ﾟΘﾟ)+ (ﾟｰﾟ)+ (o^_^o)+ (ﾟДﾟ)[ﾟεﾟ]+(ﾟΘﾟ)+ ((ﾟｰﾟ) + (ﾟΘﾟ))+ ((ﾟｰﾟ) + (o^_^o))+ (ﾟДﾟ)[ﾟεﾟ]+(ﾟΘﾟ)+ ((ﾟｰﾟ) + (ﾟΘﾟ))+ ((o^_^o) +(o^_^o))+ (ﾟДﾟ)[ﾟεﾟ]+(ﾟΘﾟ)+ ((o^_^o) +(o^_^o))+ (o^_^o)+ (ﾟДﾟ)[ﾟεﾟ]+(ﾟΘﾟ)+ ((ﾟｰﾟ) + (ﾟΘﾟ))+ ((ﾟｰﾟ) + (o^_^o))+ (ﾟДﾟ)[ﾟεﾟ]+(ﾟΘﾟ)+ ((ﾟｰﾟ) + (ﾟΘﾟ))+ (ﾟｰﾟ)+ (ﾟДﾟ)[ﾟεﾟ]+(ﾟΘﾟ)+ (ﾟｰﾟ)+ ((ﾟｰﾟ) + (ﾟΘﾟ))+ (ﾟДﾟ)[ﾟεﾟ]+((ﾟｰﾟ) + (ﾟΘﾟ))+ ((o^_^o) +(o^_^o))+ (ﾟДﾟ)[ﾟεﾟ]+(ﾟΘﾟ)+ ((ﾟｰﾟ) + (ﾟΘﾟ))+ (ﾟｰﾟ)+ (ﾟДﾟ)[ﾟεﾟ]+(ﾟΘﾟ)+ ((ﾟｰﾟ) + (ﾟΘﾟ))+ ((ﾟｰﾟ) + (o^_^o))+ (ﾟДﾟ)[ﾟεﾟ]+(ﾟΘﾟ)+ (ﾟｰﾟ)+ ((ﾟｰﾟ) + (o^_^o))+ (ﾟДﾟ)[ﾟεﾟ]+((ﾟｰﾟ) + (ﾟΘﾟ))+ (c^_^o)+ (ﾟДﾟ)[ﾟεﾟ]+(ﾟｰﾟ)+ ((o^_^o) - (ﾟΘﾟ))+ (ﾟДﾟ)[ﾟεﾟ]+(ﾟΘﾟ)+ ((ﾟｰﾟ) + (ﾟΘﾟ))+ (c^_^o)+ (ﾟДﾟ)[ﾟεﾟ]+(ﾟΘﾟ)+ ((ﾟｰﾟ) + (ﾟΘﾟ))+ (ﾟΘﾟ)+ (ﾟДﾟ)[ﾟεﾟ]+(ﾟｰﾟ)+ ((o^_^o) - (ﾟΘﾟ))+ (ﾟДﾟ)[ﾟεﾟ]+((ﾟｰﾟ) + (ﾟΘﾟ))+ (ﾟΘﾟ)+ (ﾟДﾟ)[ﾟoﾟ]) (ﾟΘﾟ)) ('_');")
-	
-	print y
-	return
+
 
 	LINK_HISTORY_FILE_NAME = "kissanime_dl_history.json"
 	"""
@@ -620,45 +617,83 @@ def main():
 	if(len(vid_links) < MAX_THREADS):
 		MAX_THREADS = len(vid_links)
 
-	def getDLUrls(queuee, links, ses):
-		#lets make a local copy
-		dl_url_x_path = DOWNLOAD_URL_X_PATH
+	dl_url_x_path = DOWNLOAD_URL_X_PATH
 
+	aadecode_mu = threading.Lock()
+	def getOpenLoadUrls(queuee, link, html_str, ses):
+		raw_data = re.search(r"""\$\('#divContentVideo'\)\.html\('<iframe sandbox="allow-forms allow-same-origin allow-scripts" style="width: 854px; height: 552px; border: 0px;" src="(.*?)\"""", html_str).group(1)
+		
+		if(raw_data == None):
+			return False
+
+		raw_data = raw_data.replace("embed", "getdllink")
+		raw_data = re.sub("\/[^/]*$", "", raw_data)
+
+		mu.acquire()
+		temp_r = ses.get(raw_data)
+		mu.release()
+
+		aadecode_mu.acquire()
+		raw_raw_data = decodeAA(temp_r.content)
+		aadecode_mu.release()
+
+		raw_raw_data = re.search("'href',\"(.*?)\"", raw_raw_data).group(1)
+		raw_raw_data = raw_raw_data.replace("\\", "")
+
+
+		mu.acquire()
+		temp_head = requests.head(raw_raw_data)
+		mu.release()
+
+		d = temp_head.headers['content-disposition']
+		file_name = re.findall("filename=(.+)", d)[0]
+
+		queuee.put([file_name, raw_raw_data, link])
+
+		if(verbose):
+			print_mu.acquire()
+			print("Found download link: " + raw_raw_data)
+			print("Found file name: " + file_name)
+			print_mu.release()
+
+	def getBlogspotUrls(queuee, link, html_str):
+		#lets make a copy
+
+		temp_tree = html.fromstring(html_str)
+		raw_data = temp_tree.xpath(DOWNLOAD_NAME)
+		if(len(raw_data) == 0):
+				return False
+			#             NAME                            DOWNLOAD_URL
+		if(PYTHON_VER < 3):
+			format_txt = raw_data[0].replace(" ", '').translate(None, escapes)
+		else:
+			format_txt = raw_data[0].replace(" ", '').translate(str.maketrans(dict.fromkeys(escapes) ) )
+
+			#no quality found
+		if(len(temp_tree.xpath(dl_url_x_path) ) == 0 and quality_txt != ""):
+			printClr("Quality " + quality_txt + " is not found", Color.RED, Color.BOLD)
+			printClr("Defaulting to highest quality", Color.BOLD)
+			dl_url_x_path = DOWNLOAD_URL_X_PATH_DEFAULT
+
+		queuee.put([format_txt, wrap(temp_tree.xpath(dl_url_x_path)[0]), link])
+		if(verbose):
+			print_mu.acquire()
+			print("Found download link: " + wrap(temp_tree.xpath(dl_url_x_path)[0] ) )
+			print("Found file name: " + format_txt)
+			print_mu.release()
+
+
+	def getDLUrls(queuee, links, ses):
 		for ur in links:
 			mu.acquire()
 			temp_r = ses.get(ur)
 			mu.release()
-			temp_tree = html.fromstring(temp_r.content)
 
-			#name
-			raw_data = temp_tree.xpath(DOWNLOAD_NAME)
-			if(len(raw_data) == 0):
-				printClr("Failed to grab url at " + ur, Color.RED, Color.BOLD)
-				if(verbose):
-					print(temp_r.content)
-				if(temp_r.status_code == requests.codes.ok):
-					printClr("You may have to open a browser and manually verify capcha", Color.BOLD)
-				continue
-			#             NAME                            DOWNLOAD_URL
-			if(PYTHON_VER < 3):
-				format_txt = raw_data[0].replace(" ", '').translate(None, escapes)
-			else:
-				format_txt = raw_data[0].replace(" ", '').translate(str.maketrans(dict.fromkeys(escapes) ) )
+			if(getBlogspotUrls(queuee, ur, temp_r.content) == False):
+				if(getOpenLoadUrls(queuee, ur, temp_r.content, ses) == False):
+					printClr("Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
 
-			#no quality found
-			if(len(temp_tree.xpath(dl_url_x_path) ) == 0 and quality_txt != ""):
-				printClr("Quality " + quality_txt + " is not found", Color.RED, Color.BOLD)
-				printClr("Defaulting to highest quality", Color.BOLD)
-				dl_url_x_path = DOWNLOAD_URL_X_PATH_DEFAULT
-
-			queuee.put([format_txt, wrap(temp_tree.xpath(dl_url_x_path)[0]), ur])
-			if(verbose):
-				print_mu.acquire()
-				print("Found download link: " + wrap(temp_tree.xpath(dl_url_x_path)[0] ) )
-				print("Found file name: " + format_txt)
-				print_mu.release()
-
-	CHUNK_SIZE = int(len(vid_links) / MAX_THREADS)
+	CHUNK_SIZE = int(math.ceil(len(vid_links) / float(MAX_THREADS ) ) )
 	dl_urls = Queue()
 	thrs = []
 	for i in range(MAX_THREADS):
@@ -670,6 +705,8 @@ def main():
 		else:
 			loc_data = vid_links[(i * CHUNK_SIZE) : (i * CHUNK_SIZE + CHUNK_SIZE)]
 		if(verbose):
+			print((i * CHUNK_SIZE))
+			print((i * CHUNK_SIZE + CHUNK_SIZE))
 			print(loc_data)
 		thrs.append(threading.Thread(target = getDLUrls, args = (dl_urls, loc_data, sess) ) )
 		thrs[i].daemon = True
@@ -757,6 +794,3 @@ def main():
 
 	printClr("Downloaded " + str(len(dl_urls) ) + " files at " + dl_path, Color.BOLD, Color.GREEN)
 	printClr("Elapsed time: " + getElapsedTime(start_time), Color.BOLD)
-
-#debugging
-main()
