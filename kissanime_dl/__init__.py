@@ -246,6 +246,8 @@ def printError():
 	printClr("An optional argument is --forcehistory", Color.BOLD)
 	print("    Forces a history to be written with the given episodes.")
 	print("    This is good for manually setting files you don't want to download when updating")
+	printClr("An optional argument is --openload", Color.BOLD)
+	print("    Forces to download from openload and attempts blogspot if openload is not supported on the page.")
 	printClr("An optional argument is --help", Color.BOLD)
 
 def getElapsedTime(s_time):
@@ -281,6 +283,7 @@ def main():
 	simulate = False
 	txtlinks = False
 	forcehistory = False
+	openload = False
 
 	episode_range = []
 	episode_range_single = False
@@ -376,6 +379,8 @@ def main():
 			elif(psd_arg.split('=')[0] == "--forcehistory"):
 				forcehistory = True
 
+			elif(psd_arg.split('=')[0] == "--openload"):
+				openload = True
 			else:
 				printClr("Unknown argument: " + sys.argv[i], Color.BOLD, Color.RED)
 				printError()
@@ -621,7 +626,15 @@ def main():
 	dl_url_x_path = DOWNLOAD_URL_X_PATH
 
 	aadecode_mu = threading.Lock()
-	def getOpenLoadUrls(queuee, link, html_str, ses):
+	def getOpenLoadUrls(queuee, link, ses):
+		payload = {"s" : "openload"}
+		
+		mu.acquire()
+		html_raw = ses.get(link, params=payload)
+		mu.release()
+
+		html_str = html_raw.content
+
 		raw_data = re.search(r"""\$\('#divContentVideo'\)\.html\('<iframe sandbox="allow-forms allow-same-origin allow-scripts" style="width: 854px; height: 552px; border: 0px;" src="(.*?)\"""", html_str).group(1)
 		
 		if(raw_data == None):
@@ -659,9 +672,17 @@ def main():
 			print("Found file name: " + file_name)
 			print_mu.release()
 
-	def getBlogspotUrls(queuee, link, html_str):
+	def getBlogspotUrls(queuee, link, ses):
 		#lets make a copy
 		global dl_url_x_path
+
+		payload = {"s" : "kissanime"}
+
+		mu.acquire()
+		html_raw = ses.get(link, params=payload)
+		mu.release()
+
+		html_str = html_raw.content
 
 		temp_tree = html.fromstring(html_str)
 		raw_data = temp_tree.xpath(DOWNLOAD_NAME)
@@ -689,13 +710,16 @@ def main():
 
 	def getDLUrls(queuee, links, ses):
 		for ur in links:
-			mu.acquire()
-			temp_r = ses.get(ur)
-			mu.release()
 
-			if(getBlogspotUrls(queuee, ur, temp_r.content) == False):
-				if(getOpenLoadUrls(queuee, ur, temp_r.content, ses) == False):
-					printClr("Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
+			if(openload == False):
+				if(getBlogspotUrls(queuee, ur, ses) == False):
+					if(getOpenLoadUrls(queuee, ur, temp_r.content, ses) == False):
+						printClr("Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
+			elif(openload == True):
+				if(getOpenLoadUrls(queuee, ur, ses) == False):
+					if(getBlogspotUrls(queuee, ur, temp_r.content) == False):
+						printClr("Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
+
 
 	CHUNK_SIZE = int(math.ceil(len(vid_links) / float(MAX_THREADS ) ) )
 	dl_urls = Queue()

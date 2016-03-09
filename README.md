@@ -121,6 +121,9 @@ Optional arguments:
 	Forces a history to be written with the given episodes.
 	This is good for manually setting files you don't want to download when updating
 
+—-openload
+	Puts priority to using openload as host. 
+
 --help: Prints help
 ```
 
