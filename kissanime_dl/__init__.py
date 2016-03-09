@@ -663,6 +663,7 @@ def main():
 		file_name = re.findall("filename=(.+)", d)[0]
 		file_name = file_name.replace("\"", '')
 		file_name = file_name.replace(" ", '')
+		file_name = file_name.replace(".mp4", '')
 
 		queuee.put([file_name, raw_raw_data, link])
 
