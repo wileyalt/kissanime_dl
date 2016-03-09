@@ -4,6 +4,15 @@
 Downloads all mp4s from a kissanime mastersite!
 (kissanime.to/Anime/*)
 
+##Currently supports as hosts:
+
+Blogspot
+
+Openload.co
+
+
+##DOES NOT SUPPORT ONEDRIVE
+
 
 #Dependencies:
 lxml
