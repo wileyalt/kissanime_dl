@@ -233,7 +233,7 @@ def printError():
 	print("    If only OPT_END is given WITH '%', then all files before OPT_END will be downloaded.")
 	print("    If OPT_BEG and OPT_END is given, then a range between the two will be downloaded.")
 	print("    '%'' literal needs to be between the two.")
-	print("    OPT_BEG needs to be above OPT_END in terms of the page")
+	print("    OPT_BEG needs to be above OPT_END in terms of the page (usually from largest to smallest)")
 	print("    Defaults to all")
 	printClr("An optional argument is --max_threads=VAL.", Color.BOLD)
 	print("    Val is the number of threads to SEARCH for the download links")
@@ -598,7 +598,8 @@ def main():
 		for ln in rm_links:
 			if(verbose):
 				print("Removing link: " + ln)
-			vid_links.remove(ln)
+			if ln in vid_links:
+				vid_links.remove(ln)
 
 
 	#assumes first arg is update
