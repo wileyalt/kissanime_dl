@@ -65,7 +65,7 @@ def printClr(string, *args):
 	print(string + Color.END)
 
 def autoUpdate():
-	printClr("UPDATING KISSANIME_DL TO NEWEST VERSION", Color.RED, Color.BOLD)
+	printClr("Checking for updates", Color.BOLD)
 	with open(os.devnull, 'wb') as devnull:
 		subprocess.check_call(['pip', 'install', '-U', 'kissanime_dl'], stdout=devnull, stderr=subprocess.STDOUT)
 
