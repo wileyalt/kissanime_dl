@@ -27,6 +27,7 @@ js2py
 
 ```
 STATIC_DEPS=true sudo pip install lxml
+pip install kissanime_dl
 ```
 
 ##Windows:
