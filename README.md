@@ -48,7 +48,7 @@ There are more steps needed. First, go to
 
 http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
 
-and download the proper lxml wheel.
+and download the proper 3.5.0 lxml wheel.
 
 Then, type
 ```
