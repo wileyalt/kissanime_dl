@@ -26,7 +26,7 @@ js2py
 ##*nix or OSX:
 
 ```
-STATIC_DEPS=true sudo pip install lxml
+STATIC_DEPS=true pip install lxml
 pip install kissanime_dl
 ```
 
