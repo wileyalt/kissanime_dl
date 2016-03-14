@@ -424,14 +424,16 @@ def main():
 
 	#open that file
 	#reads file no matter what
-	with open(PATH_TO_HISTORY) as f:
-		link_history_data = json.load(f)
+	if(os.path.isfile(PATH_TO_HISTORY) == True):
+		with open(PATH_TO_HISTORY) as f:
+			link_history_data = json.load(f)
 
-	#set url to master link
-	url = link_history_data[JSON_HIS_MASTER_LINK_KEY]
+	if(url == "update"):
+		#set url to master link
+		url = link_history_data[JSON_HIS_MASTER_LINK_KEY]
 
-	if(verbose):
-		print("Found url from history: " + url)
+		if(verbose):
+			print("Found url from history: " + url)
 
 
 	#begin session
