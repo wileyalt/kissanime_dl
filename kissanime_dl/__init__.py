@@ -31,6 +31,7 @@ from datetime import timedelta
 import requests
 from lxml import html
 import js2py
+from autoupgrade import AutoUpgrade
 
 #GOTTA GET THAT VERSION
 #Get python version
@@ -62,6 +63,11 @@ def printClr(string, *args):
 
 	string = Color.BEG + string
 	print(string + Color.END)
+
+def autoUpdate():
+	printClr("UPDATING KISSANIME_DL TO NEWEST VERSION", Color.RED, Color.BOLD)
+	cmd_name = "kissanime_dl"
+	AutoUpgrade("kissanime_dl").upgrade_if_needed()
 
 NAME = 0
 DOWNLOAD_URL = 1
@@ -260,6 +266,8 @@ def main():
 	#required for py2js
 	sys.setrecursionlimit(4000)
 
+	#check for updates
+	autoUpdate()
 
 	LINK_HISTORY_FILE_NAME = "kissanime_dl_history.json"
 	"""
