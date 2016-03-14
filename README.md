@@ -25,20 +25,8 @@ js2py
 #Installation
 ##*nix or OSX:
 
-lxml requires a c compiler.
-
-For OSX:
-
 ```
 STATIC_DEPS=true sudo pip install lxml
-```
-
-Linux already comes with a compiler, I think.
-
-Run:
-
-```
-pip install kissanime_dl
 ```
 
 ##Windows:
