@@ -21,9 +21,6 @@ requests
 
 js2py
 
-autoupgrade
-
-
 #Installation
 ##*nix or OSX:
 
