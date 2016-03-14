@@ -4,6 +4,7 @@
 
 import sys
 import platform
+import subprocess
 import os.path
 try:
 	#python2
@@ -31,7 +32,6 @@ from datetime import timedelta
 import requests
 from lxml import html
 import js2py
-from autoupgrade import AutoUpgrade
 
 #GOTTA GET THAT VERSION
 #Get python version
@@ -66,8 +66,8 @@ def printClr(string, *args):
 
 def autoUpdate():
 	printClr("UPDATING KISSANIME_DL TO NEWEST VERSION", Color.RED, Color.BOLD)
-	cmd_name = "kissanime_dl"
-	AutoUpgrade("kissanime_dl").upgrade_if_needed()
+	with open(os.devnull, 'wb') as devnull:
+		subprocess.check_call(['pip', 'install', '-U', 'kissanime_dl'], stdout=devnull, stderr=subprocess.STDOUT)
 
 NAME = 0
 DOWNLOAD_URL = 1
