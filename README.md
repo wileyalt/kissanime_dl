@@ -30,12 +30,12 @@ lxml requires a c compiler.
 For OSX:
 
 ```
-xcode-select --install
+STATIC_DEPS=true sudo pip install lxml
 ```
 
 Linux already comes with a compiler, I think.
 
-Then run:
+Run:
 
 ```
 pip install kissanime_dl
