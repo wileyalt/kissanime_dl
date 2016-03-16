@@ -726,11 +726,11 @@ def main():
 
 			if(openload == False):
 				if(getBlogspotUrls(queuee, ur, ses) == False):
-					if(getOpenLoadUrls(queuee, ur, temp_r.content, ses) == False):
+					if(getOpenLoadUrls(queuee, ur, ses) == False):
 						printClr("Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
 			elif(openload == True):
 				if(getOpenLoadUrls(queuee, ur, ses) == False):
-					if(getBlogspotUrls(queuee, ur, temp_r.content) == False):
+					if(getBlogspotUrls(queuee, ur, ses) == False):
 						printClr("Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
 
 
