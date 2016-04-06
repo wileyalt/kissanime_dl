@@ -32,6 +32,7 @@ from datetime import timedelta
 import requests
 from lxml import html
 import js2py
+from openloaddecode import openload_decode
 
 #GOTTA GET THAT VERSION
 #Get python version
@@ -110,41 +111,7 @@ def convJStoPy(string):
 	return conv
 
 def decodeAA(text):
-	#Based off of...
-	'''
-	/* AADecode - Decode encoded-as-aaencode JavaScript program.
- * 
- * Copyright (C) 2010 @cat_in_136
- * 
- * This software is released under the MIT License.
- * http://opensource.org/licenses/mit-license.php
- */
-
-	'''
-	# @ https://cat-in-136.github.io/2010/12/aadecode-decode-encoded-as-aaencode.html
-
-	evalPreamble = "(ﾟДﾟ) ['_'] ( (ﾟДﾟ) ['_'] ("
-	decodePreamble = "( (ﾟДﾟ) ['_'] ("
-	evalPostamble = ") (ﾟΘﾟ)) ('_');"
-	decodePostamble = ") ());"
-
-	text = text.replace("/^\s*/", "")
-	text = text.replace("/\s*$/", "")
-
-	#print(text)
-	if (text.rfind(evalPreamble) < 0):
-		return ":G"
-
-	if (text.rfind(evalPostamble) != len(text) - len(evalPostamble) ):
-		return ":("
-
-	decodingScript = text.replace(evalPreamble, decodePreamble)
-	decodingScript = decodingScript.replace(evalPostamble, decodePostamble);
-
-	eval_val = js2py.eval_js(decodingScript)
-
-
-	return eval_val;
+	return openload_decode(text)
 
 def wrap(string):
 	alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
@@ -264,7 +231,7 @@ def getElapsedTime(s_time):
 def main():
 
 	#required for py2js
-	sys.setrecursionlimit(4000)
+	sys.setrecursionlimit(6000)
 
 	#check for updates
 	autoUpdate()
@@ -476,7 +443,16 @@ def main():
 		printError()
 		return
 
-	js_var_r = re.search(r"https?:\/\/", js_var_t_href).group(0)
+	try:
+		js_var_r = re.search(r"https?:\/\/", js_var_t_href).group(0)
+	except AttributeError, e:
+		printClr("Regex Failure", Color.RED, Color.BOLD)
+		printClr("Could not find 'https?:\/\/' in " + js_var_t_href, Color.RED, Color.BOLD)
+		raise
+	except:
+		printClr("Unknown Regex Error", Color.RED, Color.BOLD)
+		printClr("Pattern: https?:\/\/", Color.RED, Color.BOLD)
+		raise
 
 	js_var_t = js_var_t_href[len(js_var_r) :]
 	js_var_t = js_var_t[0 : len(js_var_t) - 1]
@@ -647,28 +623,65 @@ def main():
 
 		html_str = html_raw.content
 
-		raw_data = re.search(r"""\$\('#divContentVideo'\)\.html\('<iframe sandbox="allow-forms allow-same-origin allow-scripts" style="width: 854px; height: 552px; border: 0px;" src="(.*?)\"""", html_str).group(1)
-		
+		try:
+			raw_data = re.search(r"""\$\('#divContentVideo'\)\.html\('<iframe.*src=\"(.*?)\"""", html_str).group(1)
+		except AttributeError, e:
+			printClr("Regex Failure", Color.RED, Color.BOLD)
+			printClr("Could not find '<iframe.*src=\"(.*?)\"' in " + raw_data, Color.RED, Color.BOLD)
+			raise
+		except:
+			printClr("Unknown Regex Error", Color.RED, Color.BOLD)
+			printClr("Pattern: <iframe.*src=\"(.*?)\"", Color.RED, Color.BOLD)
+			raise
+
+
 		if(raw_data == None):
 			return False
 
-		raw_data = raw_data.replace("embed", "getdllink")
-		raw_data = re.sub("\/[^/]*$", "", raw_data)
+		raw_data = raw_data.replace("embed", "f")
 
 		mu.acquire()
 		temp_r = ses.get(raw_data)
 		mu.release()
 
+		try:
+			aaencoded = re.search(">ﾟωﾟﾉ= (.*?) \('_'\);", temp_r.content).group(1)
+		except AttributeError, e:
+			printClr("Regex Failure", Color.RED, Color.BOLD)
+			printClr("Could not find '>ﾟωﾟﾉ= (.*?) \('_'\);' in " + temp_r.content, Color.RED, Color.BOLD)
+			raise
+		except:
+			printClr("Unknown Regex Error", Color.RED, Color.BOLD)
+			printClr("Pattern: >ﾟωﾟﾉ= (.*?) \('_'\);", Color.RED, Color.BOLD)
+			raise
+
+		#need to add beginning and ending face to complete the encoded string
+		aaencoded = "ﾟωﾟﾉ= " + aaencoded + " ('_');"
+
+		#I don't know if js2py is multithread safe
 		aadecode_mu.acquire()
-		raw_raw_data = decodeAA(temp_r.content)
+		decodedaa = decodeAA(aaencoded)
+		print(decodedaa)
 		aadecode_mu.release()
 
-		raw_raw_data = re.search("'href',\"(.*?)\"", raw_raw_data).group(1)
-		raw_raw_data = raw_raw_data.replace("\\", "")
+		try:
+			decodedaa = re.search("function\(\).*\(\)", decodedaa).group(1)
+		except AttributeError, e:
+			printClr("Regex Failure", Color.RED, Color.BOLD)
+			printClr("Could not find 'function\(\).*\(\)' in " + decodedaa, Color.RED, Color.BOLD)
+			raise
+		except:
+			printClr("Unknown Regex Error", Color.RED, Color.BOLD)
+			printClr("Pattern: function\(\).*\(\)", Color.RED, Color.BOLD)
+			raise
 
+		#adding var x = makes js2py return download url
+		aadecode_mu.acquire()
+		deobfuscatedaa = js2py.eval_js("var x = " + decodedaa)
+		aadecode_mu.release()
 
 		mu.acquire()
-		temp_head = requests.head(raw_raw_data)
+		temp_head = requests.head(deobfuscatedaa)
 		mu.release()
 
 		d = temp_head.headers['content-disposition']
@@ -836,3 +849,6 @@ def main():
 
 	printClr("Downloaded " + str(len(dl_urls) ) + " files at " + dl_path, Color.BOLD, Color.GREEN)
 	printClr("Elapsed time: " + getElapsedTime(start_time), Color.BOLD)
+
+#debugging
+main();
