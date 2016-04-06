@@ -661,19 +661,21 @@ def main():
 		#I don't know if js2py is multithread safe
 		aadecode_mu.acquire()
 		decodedaa = decodeAA(aaencoded)
-		print(decodedaa)
 		aadecode_mu.release()
 
 		try:
-			decodedaa = re.search("function\(\).*\(\)", decodedaa).group(1)
+			decodedaa = re.search("function\(\)(.*)\(\)", decodedaa).group(1)
 		except AttributeError, e:
 			printClr("Regex Failure", Color.RED, Color.BOLD)
-			printClr("Could not find 'function\(\).*\(\)' in " + decodedaa, Color.RED, Color.BOLD)
+			printClr("Could not find 'function\(\)(.*)\(\)' in " + decodedaa, Color.RED, Color.BOLD)
 			raise
 		except:
 			printClr("Unknown Regex Error", Color.RED, Color.BOLD)
-			printClr("Pattern: function\(\).*\(\)", Color.RED, Color.BOLD)
+			printClr("Pattern: function\(\)(.*)\(\)", Color.RED, Color.BOLD)
 			raise
+
+		#need to add function call and anonymous function
+		decodedaa = "function()" + decodedaa + "();"
 
 		#adding var x = makes js2py return download url
 		aadecode_mu.acquire()
@@ -690,11 +692,11 @@ def main():
 		file_name = file_name.replace(" ", '')
 		file_name = file_name.replace(".mp4", '')
 
-		queuee.put([file_name, raw_raw_data, link])
+		queuee.put([file_name, deobfuscatedaa, link])
 
 		if(verbose):
 			print_mu.acquire()
-			print("Found download link: " + raw_raw_data)
+			print("Found download link: " + deobfuscatedaa)
 			print("Found file name: " + file_name)
 			print_mu.release()
 
