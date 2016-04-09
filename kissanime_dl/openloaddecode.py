@@ -20,7 +20,7 @@ def openload_level2_debase(m):
   return '"' + itoa(num, radix) + '"'
 
 def openload_level2(txt):
-  return re.sub(ur'\u01c3\((\d+),(\d+)\)', openload_level2_debase, txt, re.UNICODE).replace('"+"', '')
+  return re.sub(r'\u01c3\((\d+),(\d+)\)', openload_level2_debase, txt, re.UNICODE).replace('"+"', '')
 
 def openload_decode(txt):
   c = [
@@ -50,7 +50,7 @@ def openload_decode(txt):
         ('0', '((c^_^o)-(c^_^o))'),
   ]
   delim = "(ﾟДﾟ)[ﾟεﾟ]+"
-  ret   = u''
+  ret   = ''
   for aachar in txt.split(delim):
     for i in range(len(c)):
       val,pat = c[i]
@@ -58,11 +58,11 @@ def openload_decode(txt):
     aachar = aachar.replace('+ ', '')
     m = re.match(r'^\d+', aachar)
     if m:
-      ret += unichr(int(m.group(0), 8))
+      ret += chr(int(m.group(0), 8))
     else:
       m = re.match(r'^u([\da-f]+)', aachar)
       if m:
         #print "g:", m.group(1), int(m.group(1), 16)
-        ret += unichr(int(m.group(1), 16))
+        ret += chr(int(m.group(1), 16))
   #print "ret:", ret
   return openload_level2(ret)

@@ -32,7 +32,7 @@ from datetime import timedelta
 import requests
 from lxml import html
 import js2py
-from openloaddecode import openload_decode
+from .openloaddecode import openload_decode
 
 #GOTTA GET THAT VERSION
 #Get python version
