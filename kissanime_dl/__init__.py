@@ -445,7 +445,7 @@ def main():
 
 	try:
 		js_var_r = re.search(r"https?:\/\/", js_var_t_href).group(0)
-	except AttributeError, e:
+	except AttributeError as e:
 		printClr("Regex Failure", Color.RED, Color.BOLD)
 		printClr("Could not find 'https?:\/\/' in " + js_var_t_href, Color.RED, Color.BOLD)
 		raise
@@ -625,7 +625,7 @@ def main():
 
 		try:
 			raw_data = re.search(r"""\$\('#divContentVideo'\)\.html\('<iframe.*src=\"(.*?)\"""", html_str).group(1)
-		except AttributeError, e:
+		except AttributeError as e:
 			printClr("Regex Failure", Color.RED, Color.BOLD)
 			printClr("Could not find '<iframe.*src=\"(.*?)\"' in " + raw_data, Color.RED, Color.BOLD)
 			raise
@@ -646,7 +646,7 @@ def main():
 
 		try:
 			aaencoded = re.search(">ﾟωﾟﾉ= (.*?) \('_'\);", temp_r.content).group(1)
-		except AttributeError, e:
+		except AttributeError as e:
 			printClr("Regex Failure", Color.RED, Color.BOLD)
 			printClr("Could not find '>ﾟωﾟﾉ= (.*?) \('_'\);' in " + temp_r.content, Color.RED, Color.BOLD)
 			raise
@@ -665,7 +665,7 @@ def main():
 
 		try:
 			decodedaa = re.search("function\(\)(.*)\(\)", decodedaa).group(1)
-		except AttributeError, e:
+		except AttributeError as e:
 			printClr("Regex Failure", Color.RED, Color.BOLD)
 			printClr("Could not find 'function\(\)(.*)\(\)' in " + decodedaa, Color.RED, Color.BOLD)
 			raise
