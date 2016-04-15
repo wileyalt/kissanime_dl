@@ -3,12 +3,16 @@
 # licence: public domain
 
 #Edits done for kissanime-dl
-# added `from builtins import chr` for python 2 support
-
-from builtins import chr 
+# added cross version chr (cVchr)
 
 import re
 import sys
+
+def cVchr(txt):
+	try:
+		return unichr(txt)
+	except NameError:
+		return chr(txt)
 
 # no atoi in python, really?
 # atoi stolen from: http://www.codecodex.com/wiki/Base_conversion
@@ -63,12 +67,12 @@ def openload_decode(txt):
     aachar = aachar.replace('+ ', '')
     m = re.match(r'^\d+', aachar)
     if m:
-      ret += chr(int(m.group(0), 8))
+      ret += cVchr(int(m.group(0), 8))
     else:
       m = re.match(r'^u([\da-f]+)', aachar)
       if m:
         #print "g:", m.group(1), int(m.group(1), 16)
         #this is hella hacky
-        ret += chr(int(m.group(1), 16))
+        ret += cVchr(int(m.group(1), 16))
   #print "ret:", ret
   return openload_level2(ret)
