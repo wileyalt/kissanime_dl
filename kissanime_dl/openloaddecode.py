@@ -3,7 +3,9 @@
 # licence: public domain
 
 #Edits done for kissanime-dl
-# - replaced chr with unichr
+# added `from builtins import chr` for python 2 support
+
+from builtins import chr 
 
 import re
 import sys
@@ -61,12 +63,12 @@ def openload_decode(txt):
     aachar = aachar.replace('+ ', '')
     m = re.match(r'^\d+', aachar)
     if m:
-      ret += unichr(int(m.group(0), 8))
+      ret += chr(int(m.group(0), 8))
     else:
       m = re.match(r'^u([\da-f]+)', aachar)
       if m:
         #print "g:", m.group(1), int(m.group(1), 16)
         #this is hella hacky
-        ret += unichr(int(m.group(1), 16))
+        ret += chr(int(m.group(1), 16))
   #print "ret:", ret
   return openload_level2(ret)
