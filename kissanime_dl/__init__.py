@@ -698,8 +698,6 @@ def main():
 		deobfuscatedaa = js2py.eval_js("var x = " + decodedaa)
 		aadecode_mu.release()
 
-		print(deobfuscatedaa)
-
 		mu.acquire()
 		temp_head = requests.head(deobfuscatedaa)
 		mu.release()
