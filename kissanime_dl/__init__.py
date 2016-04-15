@@ -74,13 +74,15 @@ NAME = 0
 DOWNLOAD_URL = 1
 
 console_mu = threading.Lock()
+
+#cross version
+def cVunicode(any):
+	if(PYTHON_VER < 3):
+		return unicode(any)
+	else:
+		return str(any)
+
 def downloadFile(url, dl_path):
-	#cross version
-	def cVunicode(any):
-		if(PYTHON_VER < 3):
-			return unicode(any)
-		else:
-			return str(any)
 
 	dl_name = cVunicode(url[NAME])
 	if(len(dl_name) > 252):
@@ -102,8 +104,9 @@ def findBetween(string, start, end):
 	return string[string.find(start) + len(start) : string.rfind(end)]
 
 def convJStoPy(string):
-	string = unicode(string)
-	ALLOWED_CHAR = set(unicode("![]+()") )
+
+	string = cVunicode(string)
+	ALLOWED_CHAR = set(cVunicode("![]+()") )
 
 	if(not (set(string) <= ALLOWED_CHAR) ):
 		raise RuntimeError("Converting the CloudFlare JS has changed!") 
