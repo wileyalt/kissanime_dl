@@ -1,5 +1,7 @@
 #kissanime-dl
 
+[![Build Status](https://travis-ci.org/wileyyugioh/kissanime_dl.svg?branch=master)](https://travis-ci.org/wileyyugioh/kissanime_dl)
+
 
 Downloads all mp4s from a kissanime mastersite!
 (kissanime.to/Anime/*)
