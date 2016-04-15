@@ -102,6 +102,12 @@ def findBetween(string, start, end):
 	return string[string.find(start) + len(start) : string.rfind(end)]
 
 def convJStoPy(string):
+	string = unicode(string)
+	ALLOWED_CHAR = set(unicode("![]+()") )
+
+	if(not (set(string) <= ALLOWED_CHAR) ):
+		raise RuntimeError("Converting the CloudFlare JS has changed!") 
+
 	conv = string.replace("!![]", "1")
 	conv = conv.replace("!+[]", "1")
 	conv = conv.replace("[]", "0")
@@ -623,20 +629,23 @@ def main():
 
 		html_str = html_raw.content
 
+		lxml_parse = html.fromstring(html_str)
+
+		#Selected server option
+		SEL_SER_OPT = "//select[@id='selectServer']/option[@selected]"
+		if(len(lxml_parse.xpath(SEL_SER_OPT) ) == 0):
+			return False;
+
 		try:
 			raw_data = re.search(r"""\$\('#divContentVideo'\)\.html\('<iframe.*src=\"(.*?)\"""", html_str).group(1)
 		except AttributeError as e:
 			printClr("Regex Failure", Color.RED, Color.BOLD)
-			printClr("Could not find '<iframe.*src=\"(.*?)\"' in " + raw_data, Color.RED, Color.BOLD)
-			raise
+			printClr("Could not find '<iframe.*src=\"(.*?)\"' in the html", Color.RED, Color.BOLD)
+			return False;
 		except:
 			printClr("Unknown Regex Error", Color.RED, Color.BOLD)
 			printClr("Pattern: <iframe.*src=\"(.*?)\"", Color.RED, Color.BOLD)
-			raise
-
-
-		if(raw_data == None):
-			return False
+			return False;
 
 		raw_data = raw_data.replace("embed", "f")
 
@@ -649,11 +658,11 @@ def main():
 		except AttributeError as e:
 			printClr("Regex Failure", Color.RED, Color.BOLD)
 			printClr("Could not find '>ﾟωﾟﾉ= (.*?) \('_'\);' in " + temp_r.content, Color.RED, Color.BOLD)
-			raise
+			return False;
 		except:
 			printClr("Unknown Regex Error", Color.RED, Color.BOLD)
 			printClr("Pattern: >ﾟωﾟﾉ= (.*?) \('_'\);", Color.RED, Color.BOLD)
-			raise
+			return False;
 
 		#need to add beginning and ending face to complete the encoded string
 		aaencoded = "ﾟωﾟﾉ= " + aaencoded + " ('_');"
@@ -668,11 +677,11 @@ def main():
 		except AttributeError as e:
 			printClr("Regex Failure", Color.RED, Color.BOLD)
 			printClr("Could not find 'function\(\)(.*)\(\)' in " + decodedaa, Color.RED, Color.BOLD)
-			raise
+			return False;
 		except:
 			printClr("Unknown Regex Error", Color.RED, Color.BOLD)
 			printClr("Pattern: function\(\)(.*)\(\)", Color.RED, Color.BOLD)
-			raise
+			return False;
 
 		#need to add function call and anonymous function
 		decodedaa = "function()" + decodedaa + "();"
