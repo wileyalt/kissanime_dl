@@ -635,7 +635,7 @@ def main():
 		lxml_parse = html.fromstring(html_str)
 
 		#Selected server option
-		SEL_SER_OPT = "//select[@id='selectServer']/option[@selected]"
+		SEL_SER_OPT = "//select[@id='selectServer']/option[text()='Openload']"
 		if(len(lxml_parse.xpath(SEL_SER_OPT) ) == 0):
 			return False;
 
@@ -645,6 +645,8 @@ def main():
 			printClr("Regex Failure", Color.RED, Color.BOLD)
 			printClr("Could not find '<iframe.*src=\"(.*?)\"' in the html", Color.RED, Color.BOLD)
 			return False;
+		except TypeError:
+			raw_data = re.search(r"""\$\('#divContentVideo'\)\.html\('<iframe.*src=\"(.*?)\"""", html_str.decode(html_raw.encoding) ).group(1)
 		except:
 			printClr("Unknown Regex Error", Color.RED, Color.BOLD)
 			printClr("Pattern: <iframe.*src=\"(.*?)\"", Color.RED, Color.BOLD)
@@ -662,6 +664,8 @@ def main():
 			printClr("Regex Failure", Color.RED, Color.BOLD)
 			printClr("Could not find '>ﾟωﾟﾉ= (.*?) \('_'\);' in " + temp_r.content, Color.RED, Color.BOLD)
 			return False;
+		except TypeError:
+			aaencoded = re.search(">ﾟωﾟﾉ= (.*?) \('_'\);", temp_r.text).group(1)
 		except:
 			printClr("Unknown Regex Error", Color.RED, Color.BOLD)
 			printClr("Pattern: >ﾟωﾟﾉ= (.*?) \('_'\);", Color.RED, Color.BOLD)
@@ -693,6 +697,8 @@ def main():
 		aadecode_mu.acquire()
 		deobfuscatedaa = js2py.eval_js("var x = " + decodedaa)
 		aadecode_mu.release()
+
+		print(deobfuscatedaa)
 
 		mu.acquire()
 		temp_head = requests.head(deobfuscatedaa)

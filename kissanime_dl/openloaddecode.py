@@ -4,6 +4,7 @@
 
 #Edits done for kissanime-dl
 # added cross version chr (cVchr)
+# modified itoa
 
 import re
 import sys
@@ -14,15 +15,22 @@ def cVchr(txt):
 	except NameError:
 		return chr(txt)
 
+def cVstr(txt):
+	try:
+		return unicode(txt)
+	except NameError:
+		return str(txt)
+
 # no atoi in python, really?
 # atoi stolen from: http://www.codecodex.com/wiki/Base_conversion
 # We have to write our own function for outputting to string with arbitrary base
 def itoa(num, radix):
-  result = ""
-  while num > 0:
-    result = "0123456789abcdefghijklmnopqrstuvwxyz"[num % radix] + result
-    num /= radix
-  return result
+	result = ""
+	while num > 0:
+		result = "0123456789abcdefghijklmnopqrstuvwxyz"[num % radix] + result
+		num /= radix
+		num = int(num)
+	return result
 
 def openload_level2_debase(m):
   radix, num = int(m.group(1)) + 27 , int(m.group(2))
