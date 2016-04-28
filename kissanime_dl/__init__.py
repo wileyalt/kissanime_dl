@@ -32,7 +32,10 @@ from datetime import timedelta
 import requests
 from lxml import html
 import js2py
+
 from .openloaddecode import openload_decode
+
+#from openloaddecode import openload_decode
 
 #GOTTA GET THAT VERSION
 #Get python version
@@ -109,7 +112,7 @@ def convJStoPy(string):
 	ALLOWED_CHAR = set(cVunicode("![]+()") )
 
 	if(not (set(string) <= ALLOWED_CHAR) ):
-		raise RuntimeError("Converting the CloudFlare JS has changed!") 
+		raise RuntimeError("Converting the CloudFlare JS has changed!")
 
 	conv = string.replace("!![]", "1")
 	conv = conv.replace("!+[]", "1")
@@ -440,7 +443,7 @@ def main():
 	json_data_beg = ":"
 	json_data_end = "}"
 
-	unkwn_var_name = findBetween(strip_script[8], var_beg, var_end) + "." + findBetween(strip_script[8], json_name_beg, json_name_end) 
+	unkwn_var_name = findBetween(strip_script[8], var_beg, var_end) + "." + findBetween(strip_script[8], json_name_beg, json_name_end)
 	val_unkwn_var = eval(convJStoPy(findBetween(strip_script[8], json_data_beg, json_data_end) ) )
 
 	js_var_t = "<a href='/'>x</a>"
@@ -527,7 +530,7 @@ def main():
 	print_mu = threading.Lock()
 
 	DOWNLOAD_URL_X_PATH = "//select[@id='selectQuality']"
-	DOWNLOAD_URL_X_PATH_DEFAULT = DOWNLOAD_URL_X_PATH + "/option[1]/@value" 
+	DOWNLOAD_URL_X_PATH_DEFAULT = DOWNLOAD_URL_X_PATH + "/option[1]/@value"
 	DOWNLOAD_NAME = "//div[@id='divFileName']/b/following::node()"
 	if(quality_txt != ""):
 		DOWNLOAD_URL_X_PATH = DOWNLOAD_URL_X_PATH + "/option[normalize-space(text() ) = \'" + quality_txt + "\']/@value"
@@ -619,13 +622,13 @@ def main():
 	if(len(vid_links) < MAX_THREADS):
 		MAX_THREADS = len(vid_links)
 
-	global dl_url_x_path 
+	global dl_url_x_path
 	dl_url_x_path = DOWNLOAD_URL_X_PATH
 
 	aadecode_mu = threading.Lock()
 	def getOpenLoadUrls(queuee, link, ses):
 		payload = {"s" : "openload"}
-		
+
 		mu.acquire()
 		html_raw = ses.get(link, params=payload)
 		mu.release()
@@ -693,14 +696,18 @@ def main():
 		#need to add function call and anonymous function
 		decodedaa = "function()" + decodedaa + "();"
 
+		#sometimes there are double +?
+		decodedaa = decodedaa.replace("++", "+")
+
 		#adding var x = makes js2py return download url
 		aadecode_mu.acquire()
+
 		deobfuscatedaa = js2py.eval_js("var x = " + decodedaa)
 		aadecode_mu.release()
 
 		mu.acquire()
 		temp_head = requests.head(deobfuscatedaa)
-		mu.release()
+ 		mu.release()
 
 		d = temp_head.headers['content-disposition']
 		file_name = re.findall("filename=(.+)", d)[0]
@@ -803,7 +810,7 @@ def main():
 	def writeHistory(urls_arr):
 		#lets write that history file!
 		if(verbose):
-			print("Creating history file")	
+			print("Creating history file")
 
 		json_his_data = {JSON_HIS_MASTER_LINK_KEY:url}
 
