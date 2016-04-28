@@ -707,7 +707,7 @@ def main():
 
 		mu.acquire()
 		temp_head = requests.head(deobfuscatedaa)
- 		mu.release()
+		mu.release()
 
 		d = temp_head.headers['content-disposition']
 		file_name = re.findall("filename=(.+)", d)[0]
