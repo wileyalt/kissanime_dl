@@ -81,9 +81,9 @@ console_mu = threading.Lock()
 #cross version
 def cVunicode(any):
 	try:
-		return unicode(txt)
+		return unicode(any)
 	except NameError:
-		return str(txt)
+		return str(any)
 
 def downloadFile(url, dl_path):
 
