@@ -748,7 +748,7 @@ def main():
 				format_txt = raw_data[0].replace(" ", '').translate(str.maketrans(dict.fromkeys(escapes) ) )
 			except AttributeError:
 				#python 2
-				format_txt = raw_data[0].replace(" ", '').translate(string.maketrans(dict.fromkeys(escapes) ) )
+				format_txt = raw_data[0].replace(" ", '').translate(dict.fromkeys(escapes) )
 
 			#no quality found
 		if(len(temp_tree.xpath(dl_url_x_path) ) == 0 and quality_txt != ""):
