@@ -80,10 +80,10 @@ console_mu = threading.Lock()
 
 #cross version
 def cVunicode(any):
-	if(PYTHON_VER < 3):
-		return unicode(any)
-	else:
-		return str(any)
+	try:
+		return unichr(any)
+	except NameError:
+		return chr(any)
 
 def downloadFile(url, dl_path):
 
@@ -740,9 +740,9 @@ def main():
 		if(len(raw_data) == 0):
 				return False
 			#             NAME                            DOWNLOAD_URL
-		if(PYTHON_VER < 3):
+		try:
 			format_txt = raw_data[0].replace(" ", '').translate(None, escapes)
-		else:
+		except TypeError:
 			format_txt = raw_data[0].replace(" ", '').translate(str.maketrans(dict.fromkeys(escapes) ) )
 
 			#no quality found
