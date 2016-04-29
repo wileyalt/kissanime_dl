@@ -6,6 +6,7 @@ import sys
 import platform
 import subprocess
 import os.path
+import string
 try:
 	#python2
 	from Queue import Queue
@@ -743,7 +744,11 @@ def main():
 		try:
 			format_txt = raw_data[0].replace(" ", '').translate(None, escapes)
 		except TypeError:
-			format_txt = raw_data[0].replace(" ", '').translate(str.maketrans(dict.fromkeys(escapes) ) )
+			try:
+				format_txt = raw_data[0].replace(" ", '').translate(str.maketrans(dict.fromkeys(escapes) ) )
+			except AttributeError:
+				#python 2
+				format_txt = raw_data[0].replace(" ", '').translate(string.maketrans(dict.fromkeys(escapes) ) )
 
 			#no quality found
 		if(len(temp_tree.xpath(dl_url_x_path) ) == 0 and quality_txt != ""):
