@@ -2,34 +2,49 @@
 
 import re
 
-def cVstr(txt):
-	try:
-		return unicode(txt)
-	except NameError:
-		return str(txt)
-
 def baseN(num,b,numerals="0123456789abcdefghijklmnopqrstuvwxyz"):
 	return ((num == 0) and numerals[0]) or (baseN(num // b, b, numerals).lstrip(numerals[0]) + numerals[num % b])
 
 def exclaFunc(string):
-	split_str = string.split(',')
-	split_str[1] = split_str[1].replace(" ", '')
-	return baseN(int(split_str[1]), int(split_str[0]) + 27)
+	try:
+		split_str = string.split(',')
+		split_str[1] = split_str[1].replace(" ", '')
+		return baseN(int(split_str[1]), int(split_str[0]) + 27)
+	except TypeError:
+		split_str = string.split(b',')
+		split_str[1] = split_str[1].replace(b" ", b'')
+		return baseN(int(split_str[1]), int(split_str[0]) + 27)
 
 def jsdecode(raw_str):
 	raw_str = raw_str.encode('utf8')
-	regex = re.compile(r'ǃ\((?:.*?)\)', re.UNICODE)
-	parsed = regex.findall(raw_str)
+	try:
+		parsed = re.findall(r'ǃ\((?:.*?)\)', raw_str)
+	except TypeError:
+		parsed = re.findall('ǃ\((?:.*?)\)'.encode('utf8'), raw_str)
 
-	for sing_val in parsed:
-		raw_str = raw_str.replace(sing_val, '"' + exclaFunc(sing_val.replace("ǃ(", "").replace(")", "") ) + '"')
+	try:
+		for sing_val in parsed:
+			raw_str = raw_str.replace(sing_val, '"' + exclaFunc(sing_val.replace("ǃ(", "").replace(")", "") ) + '"')
+	except TypeError:
+		for sing_val in parsed:
+			tempval = b'"' + exclaFunc(sing_val.replace("ǃ(".encode('utf8'), b"").replace(b")", b"") ).encode('utf8')
+			raw_str = raw_str.replace(sing_val, tempval)
 
-	str_split = raw_str.replace(" ", '').split("+")
+	try:
+		str_split = raw_str.replace(" ", '').split("+")
+	except TypeError:
+		str_split = raw_str.replace(b" ", b'').split(b"+")
 
 	fin_data = ''
-	for val in str_split:
-		val = val.replace("\"", "")
-		val = val.replace("\'", "")
+	try:
+		for val in str_split:
+			val = val.replace("\"", "")
+			val = val.replace("\'", "")
+			fin_data = fin_data + val
+	except TypeError:
+		for val in str_split:
+			val = val.replace(b'"', b"")
+			val = val.replace(b"'", b"")
+			fin_data = fin_data + val.decode('utf8')
 
-		fin_data = fin_data + val
 	return fin_data

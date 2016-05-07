@@ -3,6 +3,10 @@
 #By WILEY YU
 
 DEBUG = 0
+url = ''
+JSON_HIS_MASTER_LINK_KEY = "master_link"
+JSON_HIS_VID_LINKS_KEY = "vid_links"
+link_history_data = {}
 
 #VERSION
 try:
@@ -135,8 +139,6 @@ def downloadFile(url, dl_path):
 	if(os.path.isfile(f_name) ):
 		size = os.path.getsize(f_name)
 
-	print(size)
-
 	#Range Header prepare
 	#For resuming downloads
 	range_header = {'Range': 'bytes=%d-' % size}
@@ -150,8 +152,6 @@ def downloadFile(url, dl_path):
 		type_of_file_op = "ab"
 	else:
 		type_of_file_op = "wb"
-
-	print(data.status_code)
 
 	with open(f_name, type_of_file_op) as dl_file:
 		shutil.copyfileobj(data.raw, dl_file)
@@ -323,8 +323,6 @@ def main():
 	]
 
 	"""
-	JSON_HIS_MASTER_LINK_KEY = "master_link"
-	JSON_HIS_VID_LINKS_KEY = "vid_links"
 
 	#beginning clock
 	start_time = time.time()
@@ -343,7 +341,6 @@ def main():
 	episode_range_single = False
 
 	MAX_THREADS = 5
-	link_history_data = {}
 	quality_txt = ""
 
 	#optional args
@@ -944,3 +941,6 @@ def main():
 
 	printClr("Downloaded " + str(len(dl_urls) ) + " files at " + dl_path, Color.BOLD, Color.GREEN)
 	printClr("Elapsed time: " + getElapsedTime(start_time), Color.BOLD)
+
+#debug
+main()
