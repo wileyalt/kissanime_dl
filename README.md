@@ -136,6 +136,9 @@ Optional arguments:
 —-openload
 	Puts priority to using openload as host. 
 
+—noupdate
+	Prevents kissanime_dl from autoupdating
+
 --help: Prints help
 ```
 

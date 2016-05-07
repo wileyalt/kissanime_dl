@@ -98,24 +98,30 @@ PARENT_URL = 2
 console_mu = threading.Lock()
 write_hist = threading.Lock()
 
-def writeHistory(urls_arr, link_history_data, PATH_TO_HISTORY):
-		#lets write that history file!
+def writeHistory(urls_arr, PATH_TO_HISTORY, masterurl):
+	#lets write that history file!
+	link_history_data = {}
 
-		json_his_data = {JSON_HIS_MASTER_LINK_KEY:url}
+	#open that file
+	#reads file no matter what
+	if(os.path.isfile(PATH_TO_HISTORY) == True):
+		with open(PATH_TO_HISTORY) as f:
+			link_history_data = json.load(f)
 
-		#not update
-		if(len(link_history_data) == 0):
-			json_his_data[JSON_HIS_VID_LINKS_KEY] = urls_arr
-		else:
-			#is update
-			temp_data = link_history_data[JSON_HIS_VID_LINKS_KEY]
-			for lnk in urls_arr:
-				temp_data.append(lnk)
+	json_his_data = {JSON_HIS_MASTER_LINK_KEY:masterurl}
 
-			json_his_data[JSON_HIS_VID_LINKS_KEY] = temp_data
+	#not update
+	if(len(link_history_data) == 0):
+		json_his_data[JSON_HIS_VID_LINKS_KEY] = urls_arr
+	else:
+		#is update
+		temp_data = link_history_data[JSON_HIS_VID_LINKS_KEY]
+		for lnk in urls_arr:
+			temp_data.append(lnk)
 
-		with open(PATH_TO_HISTORY, 'w') as f_data:
-			json.dump(json_his_data, f_data)
+		json_his_data[JSON_HIS_VID_LINKS_KEY] = temp_data
+	with open(PATH_TO_HISTORY, 'w') as f_data:
+		json.dump(json_his_data, f_data)
 
 #cross version
 def cVunicode(any):
@@ -124,7 +130,7 @@ def cVunicode(any):
 	except NameError:
 		return str(any)
 
-def downloadFile(url, dl_path, link_history_data, PATH_TO_HISTORY):
+def downloadFile(url, dl_path, PATH_TO_HISTORY, masterurl):
 	dl_name = cVunicode(url[NAME])
 	if(len(dl_name) > 252):
 		dl_name = dl_name[:252]
@@ -134,6 +140,14 @@ def downloadFile(url, dl_path, link_history_data, PATH_TO_HISTORY):
 
 	if(os.path.isfile(f_name) ):
 		size = os.path.getsize(f_name)
+		console_mu.acquire()
+		print("Resuming download of " + dl_name)
+		console_mu.release()
+	else:
+		console_mu.acquire()
+		print("Beginning to download " + dl_name)
+		console_mu.release()
+
 
 	#Range Header prepare
 	#For resuming downloads
@@ -145,15 +159,9 @@ def downloadFile(url, dl_path, link_history_data, PATH_TO_HISTORY):
 
 	#Check to see if partial content status code is sent back
 	if(data.status_code == 206):
-		console_mu.acquire()
-		print("Resuming download of " + dl_name)
-		console_mu.release()
 		type_of_file_op = "ab"
 	else:
 		type_of_file_op = "wb"
-		console_mu.acquire()
-		print("Beginning to download " + dl_name)
-		console_mu.release()
 
 	with open(f_name, type_of_file_op) as dl_file:
 		shutil.copyfileobj(data.raw, dl_file)
@@ -161,7 +169,7 @@ def downloadFile(url, dl_path, link_history_data, PATH_TO_HISTORY):
 
 	#write to data immediately to save
 	write_hist.acquire()
-	writeHistory(url[PARENT_URL], link_history_data, PATH_TO_HISTORY)
+	writeHistory([url[PARENT_URL] ], PATH_TO_HISTORY, masterurl)
 	write_hist.release()
 
 	console_mu.acquire()
@@ -301,6 +309,8 @@ def printError():
 	print("    This is good for manually setting files you don't want to download when updating")
 	printClr("An optional argument is --openload", Color.BOLD)
 	print("    Forces to download from openload and attempts blogspot if openload is not supported on the page.")
+	printClr("An optional argument is --noupdate", Color.BOLD)
+	print("    Prevents the program from checking for and updating to the newest version of kissanime_dl")
 	printClr("An optional argument is --help", Color.BOLD)
 
 def getElapsedTime(s_time):
@@ -312,9 +322,6 @@ def main():
 
 	#required for py2js
 	sys.setrecursionlimit(6000)
-
-	#check for updates
-	autoUpdate()
 
 	LINK_HISTORY_FILE_NAME = "kissanime_dl_history.json"
 	"""
@@ -338,28 +345,29 @@ def main():
 	txtlinks = False
 	forcehistory = False
 	openload = False
+	auto_update = True
 
 	episode_range = []
 	episode_range_single = False
 
 	MAX_THREADS = 5
-	link_history_data = {}
 	quality_txt = ""
 
 	#optional args
 	if(len(sys.argv) > 3):
 		for i in range (3, len(sys.argv) ):
 			psd_arg = sys.argv[i]
-			if(psd_arg.split('=')[0] == "--verbose"):
+			case_arg = psd_arg.split('=')[0]
+			if(case_arg == "--verbose"):
 				verbose = True
-			elif(psd_arg.split('=')[0] == "--simulate"):
+			elif(case_arg == "--simulate"):
 				simulate = True
-			elif(psd_arg.split('=')[0] == "--txtlinks"):
+			elif(case_arg == "--txtlinks"):
 				txtlinks = True
-			elif(psd_arg.split('=')[0] == "--help"):
+			elif(case_arg == "--help"):
 				printError()
 				return
-			elif(psd_arg.split('=')[0] == "--episode"):
+			elif(case_arg == "--episode"):
 				eps = psd_arg.split('=')[1].replace(' ', '')
 				first = ''
 				second = ''
@@ -409,7 +417,7 @@ def main():
 				elif(verbose and episode_range_single):
 					print("Searching for episode: " + episode_range[0])
 
-			elif(psd_arg.split('=')[0] == "--max_threads"):
+			elif(case_arg == "--max_threads"):
 				str_val = psd_arg.split('=')[1]
 				if(not str_val.isdigit() ):
 					printClr("Error: " + str_val + " is not a valid value for threading", Color.BOLD, Color.RED)
@@ -421,7 +429,7 @@ def main():
 					printClr("Error: Cannot have max threads less than 1", Color.BOLD, Color.RED)
 					return
 
-			elif(psd_arg.split('=')[0] == "--quality"):
+			elif(case_arg == "--quality"):
 				quality_txt = psd_arg.split('=')[1]
 				if(not quality_txt.isdigit() and quality_txt[:-1] is not 'p'):
 					printClr("Error: " + quality_txt + " is not a numerical value", Color.BOLD, Color.RED)
@@ -430,11 +438,14 @@ def main():
 				if(quality_txt.isdigit() and quality_txt[:-1] is not 'p'):
 					quality_txt = quality_txt + 'p'
 
-			elif(psd_arg.split('=')[0] == "--forcehistory"):
+			elif(case_arg == "--forcehistory"):
 				forcehistory = True
 
-			elif(psd_arg.split('=')[0] == "--openload"):
+			elif(case_arg == "--openload"):
 				openload = True
+
+			elif(case_arg == "--noupdate"):
+				auto_update = False
 			else:
 				printClr("Unknown argument: " + sys.argv[i], Color.BOLD, Color.RED)
 				printError()
@@ -444,6 +455,11 @@ def main():
 		printClr("Error: kissanime_dl takes in 2 args, the url, and the path to download to", Color.BOLD, Color.RED)
 		printError()
 		return
+
+	#check for updates
+	if auto_update:
+		autoUpdate()
+
 
 	#gets first arg
 	url = sys.argv[1]
@@ -476,15 +492,13 @@ def main():
 			printClr("Make sure that " + LINK_HISTORY_FILE_NAME + " exists at that directory", Color.BOLD)
 			return
 
-	#open that file
-	#reads file no matter what
-	if(os.path.isfile(PATH_TO_HISTORY) == True):
-		with open(PATH_TO_HISTORY) as f:
-			link_history_data = json.load(f)
-
+	magiclink = {}
 	if(url == "update"):
 		#set url to master link
-		url = link_history_data[JSON_HIS_MASTER_LINK_KEY]
+		if(os.path.isfile(PATH_TO_HISTORY) == True):
+			with open(PATH_TO_HISTORY) as f:
+				magiclink = json.load(f)
+		url = magiclink[JSON_HIS_MASTER_LINK_KEY]
 
 		if(verbose):
 			print("Found url from history: " + url)
@@ -670,8 +684,8 @@ def main():
 
 	#assumes first arg is update
 	#checks to see if link_history_data has data in it
-	if(len(link_history_data) != 0):
-		for lnk in link_history_data[JSON_HIS_VID_LINKS_KEY]:
+	if(len(magiclink) != 0):
+		for lnk in magiclink[JSON_HIS_VID_LINKS_KEY]:
 			if(lnk in vid_links):
 				if(verbose):
 					print("Removing link: " + lnk)
@@ -679,7 +693,7 @@ def main():
 				vid_links.remove(lnk)
 
 	if(len(vid_links) == 0):
-		if(len(link_history_data) != 0):
+		if(len(magiclink) != 0):
 			printClr("No video updates found!", Color.BOLD, Color.RED)
 			return
 
@@ -904,7 +918,7 @@ def main():
 	if(simulate):
 		print("Finished simulation")
 		if(forcehistory):
-			writeHistory([lnk[PARENT_URL] for lnk in dl_urls], link_history_data, PATH_TO_HISTORY)
+			writeHistory([lnk[PARENT_URL] for lnk in dl_urls], PATH_TO_HISTORY, url)
 
 		printClr("Found " + str(len(dl_urls) ) + " links", Color.BOLD, Color.GREEN)
 		printClr("Elapsed time: " + getElapsedTime(start_time), Color.BOLD)
@@ -916,7 +930,7 @@ def main():
 		FILE_PATH = dl_path + "/" + FILE_NAME
 
 		if(forcehistory):
-			writeHistory([lnk[PARENT_URL] for lnk in dl_urls], link_history_data, PATH_TO_HISTORY)
+			writeHistory([lnk[PARENT_URL] for lnk in dl_urls], PATH_TO_HISTORY, url)
 
 		with open(FILE_PATH, 'w') as txt_data:
 			for item in dl_urls:
@@ -931,7 +945,7 @@ def main():
 	#more threads to start downloading
 	lazy_programming = 0
 	for dl_sing_url in dl_urls:
-		thrs.append(threading.Thread(target = downloadFile, args = (dl_sing_url, dl_path, link_history_data, PATH_TO_HISTORY) ) )
+		thrs.append(threading.Thread(target = downloadFile, args = (dl_sing_url, dl_path, PATH_TO_HISTORY, url) ) )
 		thrs[lazy_programming].daemon = True
 		thrs[lazy_programming].start()
 		lazy_programming += 1
@@ -939,8 +953,6 @@ def main():
 	while(threading.active_count() > 1):
 		#wait one tenth of a sec
 		time.sleep(0.1)
-
-	#writeHistory([lnk[PARENT_URL] for lnk in dl_urls])
 
 	printClr("Downloaded " + str(len(dl_urls) ) + " files at " + dl_path, Color.BOLD, Color.GREEN)
 	printClr("Elapsed time: " + getElapsedTime(start_time), Color.BOLD)

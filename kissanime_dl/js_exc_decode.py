@@ -1,9 +1,18 @@
 # -*- coding: utf-8 -*-
 
+#decodes the function that looks like !(a, b)
+
+#Wiley Yu
+
 import re
 
-def baseN(num,b,numerals="0123456789abcdefghijklmnopqrstuvwxyz"):
-	return ((num == 0) and numerals[0]) or (baseN(num // b, b, numerals).lstrip(numerals[0]) + numerals[num % b])
+def baseN(num, radix):
+	result = ""
+	while num > 0:
+		result = "0123456789abcdefghijklmnopqrstuvwxyz"[num % radix] + result
+		num /= radix
+		num = int(num)
+	return result
 
 def exclaFunc(string):
 	try:
