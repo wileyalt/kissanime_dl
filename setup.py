@@ -1,8 +1,13 @@
 from setuptools import setup
-from kissanime_dl import __version__
+from distutils.util import convert_path
+
+main_ns = {}
+ver_path = convert_path('kissanime_dl/version.py')
+with open(ver_path) as ver_file:
+    exec(ver_file.read(), main_ns)
 
 setup(name='kissanime_dl',
-	version=__version__,
+	version=main_ns['__version__'],
 	description='Easy downloading .mp4s from kissanime.to',
 	url="https://github.com/wileyyugioh/kissanime_dl",
 	author='Wiley Y.',

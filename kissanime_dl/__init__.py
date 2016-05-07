@@ -3,7 +3,10 @@
 #By WILEY YU
 
 #VERSION
-__version__ = "1.6"
+try:
+	from version import __version__
+except ImportError:
+	from .version import __version__
 
 import sys
 import platform
