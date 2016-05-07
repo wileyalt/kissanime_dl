@@ -2,6 +2,8 @@
 
 #By WILEY YU
 
+DEBUG = 0
+
 #VERSION
 try:
 	from version import __version__
@@ -44,6 +46,11 @@ try:
 	from openloaddecode import openload_decode
 except ImportError:
 	from .openloaddecode import openload_decode
+
+try:
+	from js_exc_decode import jsdecode
+except ImportError:
+	from .js_exc_decode import jsdecode
 
 #GOTTA GET THAT VERSION
 #Get python version
@@ -180,6 +187,9 @@ def convJStoPy(string):
 
 def decodeAA(text):
 	return openload_decode(text)
+
+def decodeFunky(text):
+	return jsdecode(text)
 
 def wrap(string):
 	alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
@@ -756,11 +766,21 @@ def main():
 		#sometimes there are double +?
 		decodedaa = decodedaa.replace("++", "+")
 
-		#adding var x = makes js2py return download url
-		aadecode_mu.acquire()
+		try:
+			decodedaa = re.search(".*(return)(.*)}", decodedaa).group(2)
+		except AttributeError as e:
+			printClr("Regex Failure", Color.RED, Color.BOLD)
+			printClr("Could not find '.*(return)(.*)}' in " + decodedaa, Color.RED, Color.BOLD)
+			return False;
+		except:
+			printClr("Unknown Regex Error", Color.RED, Color.BOLD)
+			printClr("Pattern: .*(return)(.*)}", Color.RED, Color.BOLD)
+			return False;
 
-		deobfuscatedaa = js2py.eval_js("var x = " + decodedaa)
-		aadecode_mu.release()
+		decodedaa = decodedaa.replace(" ", '')
+		decodedaa = decodedaa.replace("\n", '')
+
+		deobfuscatedaa = decodeFunky(decodedaa)
 
 		mu.acquire()
 		temp_head = requests.head(deobfuscatedaa)
@@ -834,17 +854,19 @@ def main():
 
 
 	def getDLUrls(queuee, links, ses):
-		for ur in links:
+		try:
+			for ur in links:
 
-			if(openload == False):
-				if(getBlogspotUrls(queuee, ur, ses) == False):
-					if(getOpenLoadUrls(queuee, ur, ses) == False):
-						printClr("Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
-			elif(openload == True):
-				if(getOpenLoadUrls(queuee, ur, ses) == False):
+				if(openload == False):
 					if(getBlogspotUrls(queuee, ur, ses) == False):
-						printClr("Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
-
+						if(getOpenLoadUrls(queuee, ur, ses) == False):
+							printClr("Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
+				elif(openload == True):
+					if(getOpenLoadUrls(queuee, ur, ses) == False):
+						if(getBlogspotUrls(queuee, ur, ses) == False):
+							printClr("Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
+		except:
+			return
 
 	CHUNK_SIZE = int(math.ceil(len(vid_links) / float(MAX_THREADS ) ) )
 	dl_urls = Queue()
