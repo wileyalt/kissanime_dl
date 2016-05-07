@@ -98,7 +98,7 @@ PARENT_URL = 2
 console_mu = threading.Lock()
 write_hist = threading.Lock()
 
-def writeHistory(urls_arr, link_history_data):
+def writeHistory(urls_arr, link_history_data, PATH_TO_HISTORY):
 		#lets write that history file!
 
 		json_his_data = {JSON_HIS_MASTER_LINK_KEY:url}
@@ -124,14 +124,11 @@ def cVunicode(any):
 	except NameError:
 		return str(any)
 
-def downloadFile(url, dl_path, link_history_data):
+def downloadFile(url, dl_path, link_history_data, PATH_TO_HISTORY):
 	dl_name = cVunicode(url[NAME])
 	if(len(dl_name) > 252):
 		dl_name = dl_name[:252]
 
-	console_mu.acquire()
-	print("Beginning to download " + dl_name)
-	console_mu.release()
 	f_name = dl_path + "/" + dl_name + ".mp4"
 	size = 0
 
@@ -148,9 +145,15 @@ def downloadFile(url, dl_path, link_history_data):
 
 	#Check to see if partial content status code is sent back
 	if(data.status_code == 206):
+		console_mu.acquire()
+		print("Resuming download of " + dl_name)
+		console_mu.release()
 		type_of_file_op = "ab"
 	else:
 		type_of_file_op = "wb"
+		console_mu.acquire()
+		print("Beginning to download " + dl_name)
+		console_mu.release()
 
 	with open(f_name, type_of_file_op) as dl_file:
 		shutil.copyfileobj(data.raw, dl_file)
@@ -158,7 +161,7 @@ def downloadFile(url, dl_path, link_history_data):
 
 	#write to data immediately to save
 	write_hist.acquire()
-	writeHistory(url[PARENT_URL], link_history_data)
+	writeHistory(url[PARENT_URL], link_history_data, PATH_TO_HISTORY)
 	write_hist.release()
 
 	console_mu.acquire()
@@ -901,7 +904,7 @@ def main():
 	if(simulate):
 		print("Finished simulation")
 		if(forcehistory):
-			writeHistory([lnk[PARENT_URL] for lnk in dl_urls], link_history_data)
+			writeHistory([lnk[PARENT_URL] for lnk in dl_urls], link_history_data, PATH_TO_HISTORY)
 
 		printClr("Found " + str(len(dl_urls) ) + " links", Color.BOLD, Color.GREEN)
 		printClr("Elapsed time: " + getElapsedTime(start_time), Color.BOLD)
@@ -913,7 +916,7 @@ def main():
 		FILE_PATH = dl_path + "/" + FILE_NAME
 
 		if(forcehistory):
-			writeHistory([lnk[PARENT_URL] for lnk in dl_urls], link_history_data)
+			writeHistory([lnk[PARENT_URL] for lnk in dl_urls], link_history_data, PATH_TO_HISTORY)
 
 		with open(FILE_PATH, 'w') as txt_data:
 			for item in dl_urls:
@@ -928,7 +931,7 @@ def main():
 	#more threads to start downloading
 	lazy_programming = 0
 	for dl_sing_url in dl_urls:
-		thrs.append(threading.Thread(target = downloadFile, args = (dl_sing_url, dl_path, link_history_data) ) )
+		thrs.append(threading.Thread(target = downloadFile, args = (dl_sing_url, dl_path, link_history_data, PATH_TO_HISTORY) ) )
 		thrs[lazy_programming].daemon = True
 		thrs[lazy_programming].start()
 		lazy_programming += 1
