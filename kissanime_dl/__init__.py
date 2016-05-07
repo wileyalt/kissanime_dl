@@ -2,6 +2,9 @@
 
 #By WILEY YU
 
+#VERSION
+__version__ = "1.5.7"
+
 import sys
 import platform
 import subprocess
@@ -34,9 +37,10 @@ import requests
 from lxml import html
 import js2py
 
-from .openloaddecode import openload_decode
-
-#from openloaddecode import openload_decode
+try:
+	from openloaddecode import openload_decode
+except ImportError:
+	from .openloaddecode import openload_decode
 
 #GOTTA GET THAT VERSION
 #Get python version
@@ -266,6 +270,7 @@ def main():
 	plat = platform.system()
 	print("Platform: " + plat)
 	print("Python Version: " + str(PYTHON_VER) )
+	printClr("Program Version: " + __version__, Color.BOLD)
 
 	verbose = False
 	simulate = False
@@ -738,17 +743,30 @@ def main():
 
 		temp_tree = html.fromstring(html_str)
 		raw_data = temp_tree.xpath(DOWNLOAD_NAME)
+
 		if(len(raw_data) == 0):
 				return False
-			#             NAME                            DOWNLOAD_URL
-		try:
-			format_txt = raw_data[0].replace(" ", '').translate(None, escapes)
-		except TypeError:
+
+					#             NAME                            DOWNLOAD_URL
+		def sanitize(funky_str):
 			try:
-				format_txt = raw_data[0].replace(" ", '').translate(str.maketrans(dict.fromkeys(escapes) ) )
-			except AttributeError:
-				#python 2
-				format_txt = raw_data[0].replace(" ", '').translate(dict.fromkeys(escapes) )
+				ft = funky_str.replace(" ", '').translate(None, escapes)
+			except TypeError:
+				try:
+					ft = funky_str.replace(" ", '').translate(str.maketrans(dict.fromkeys(escapes) ) )
+				except AttributeError:
+					#python 2
+					ft = funky_str.replace(" ", '').translate(dict.fromkeys(escapes) )
+
+			return ft
+
+		format_txt = sanitize(raw_data[0])
+
+		#With email protection, sometimes only the [ is shown
+		if(format_txt == "["):
+			#hmm. this is a hacky fix
+			#The rest of the data is generally in 5?
+			format_txt = format_txt + sanitize(raw_data[5])
 
 			#no quality found
 		if(len(temp_tree.xpath(dl_url_x_path) ) == 0 and quality_txt != ""):
