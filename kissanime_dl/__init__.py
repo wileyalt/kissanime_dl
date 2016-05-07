@@ -3,7 +3,7 @@
 #By WILEY YU
 
 #VERSION
-__version__ = "1.5.7"
+__version__ = "1.6"
 
 import sys
 import platform
@@ -80,8 +80,29 @@ def autoUpdate():
 
 NAME = 0
 DOWNLOAD_URL = 1
+PARENT_URL = 2
 
 console_mu = threading.Lock()
+write_hist = threading.Lock()
+
+def writeHistory(urls_arr):
+		#lets write that history file!
+
+		json_his_data = {JSON_HIS_MASTER_LINK_KEY:url}
+
+		#not update
+		if(len(link_history_data) == 0):
+			json_his_data[JSON_HIS_VID_LINKS_KEY] = urls_arr
+		else:
+			#is update
+			temp_data = link_history_data[JSON_HIS_VID_LINKS_KEY]
+			for lnk in urls_arr:
+				temp_data.append(lnk)
+
+			json_his_data[JSON_HIS_VID_LINKS_KEY] = temp_data
+
+		with open(PATH_TO_HISTORY, 'w') as f_data:
+			json.dump(json_his_data, f_data)
 
 #cross version
 def cVunicode(any):
@@ -91,7 +112,6 @@ def cVunicode(any):
 		return str(any)
 
 def downloadFile(url, dl_path):
-
 	dl_name = cVunicode(url[NAME])
 	if(len(dl_name) > 252):
 		dl_name = dl_name[:252]
@@ -99,14 +119,42 @@ def downloadFile(url, dl_path):
 	console_mu.acquire()
 	print("Beginning to download " + dl_name)
 	console_mu.release()
-	data = requests.get(url[DOWNLOAD_URL], stream = True)
-	with open(dl_path + "/" + dl_name + ".mp4", 'wb') as dl_file:
+	f_name = dl_path + "/" + dl_name + ".mp4"
+	size = 0
+
+	if(os.path.isfile(f_name) ):
+		size = os.path.getsize(f_name)
+
+	print(size)
+
+	#Range Header prepare
+	#For resuming downloads
+	range_header = {'Range': 'bytes=%d-' % size}
+	data = requests.get(url[DOWNLOAD_URL], headers=range_header, stream = True)
+
+
+	type_of_file_op = ''
+
+	#Check to see if partial content status code is sent back
+	if(data.status_code == 206):
+		type_of_file_op = "ab"
+	else:
+		type_of_file_op = "wb"
+
+	print(data.status_code)
+
+	with open(f_name, type_of_file_op) as dl_file:
 		shutil.copyfileobj(data.raw, dl_file)
 	del data
+
+	#write to data immediately to save
+	write_hist.acquire()
+	writeHistory(url[PARENT_URL])
+	write_hist.release()
+
 	console_mu.acquire()
 	print("Finished downloading " + dl_name)
 	console_mu.release()
-	return
 
 def findBetween(string, start, end):
 	return string[string.find(start) + len(start) : string.rfind(end)]
@@ -828,32 +876,6 @@ def main():
 
 	dl_urls = [item for item in dl_urls.queue]
 
-
-	PARENT_URL = 2
-	def writeHistory(urls_arr):
-		#lets write that history file!
-		if(verbose):
-			print("Creating history file")
-
-		json_his_data = {JSON_HIS_MASTER_LINK_KEY:url}
-
-		#not update
-		if(len(link_history_data) == 0):
-			json_his_data[JSON_HIS_VID_LINKS_KEY] = urls_arr
-		else:
-			#is update
-			temp_data = link_history_data[JSON_HIS_VID_LINKS_KEY]
-			for lnk in urls_arr:
-				temp_data.append(lnk)
-
-			json_his_data[JSON_HIS_VID_LINKS_KEY] = temp_data
-
-		if(verbose):
-			print("Writing json file")
-
-		with open(PATH_TO_HISTORY, 'w') as f_data:
-			json.dump(json_his_data, f_data)
-
 	if(simulate):
 		print("Finished simulation")
 		if(forcehistory):
@@ -893,7 +915,7 @@ def main():
 		#wait one tenth of a sec
 		time.sleep(0.1)
 
-	writeHistory([lnk[PARENT_URL] for lnk in dl_urls])
+	#writeHistory([lnk[PARENT_URL] for lnk in dl_urls])
 
 	printClr("Downloaded " + str(len(dl_urls) ) + " files at " + dl_path, Color.BOLD, Color.GREEN)
 	printClr("Elapsed time: " + getElapsedTime(start_time), Color.BOLD)

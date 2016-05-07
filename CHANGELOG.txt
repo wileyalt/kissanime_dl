@@ -1,4 +1,6 @@
-1.4.0 Made cross platform easier
+1.6:   Added Resuming Downloads
+
+1.4.0: Made cross platform easier
 
 1.3.0:
 	Added txtlink argument.
