@@ -27,7 +27,7 @@ js2py
 ##*nix or OSX:
 
 ```
-STATIC_DEPS=true pip install lxml==3.5.0
+STATIC_DEPS=true pip install lxml==3.6.0
 pip install kissanime_dl
 ```
 
@@ -49,7 +49,7 @@ There are more steps needed. First, go to
 
 http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
 
-and download the proper 3.5.0 lxml wheel.
+and download the proper 3.6.0 lxml wheel.
 
 Then, type
 ```
