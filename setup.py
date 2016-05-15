@@ -1,13 +1,13 @@
 from setuptools import setup
 from distutils.util import convert_path
 
+ print("Special considerations need to be taken for Windows and OSX users.")
+ print("Read more at https://github.com/wileyyugioh/kissanime_dl/blob/master/README.md")
+
 main_ns = {}
 ver_path = convert_path('kissanime_dl/version.py')
 with open(ver_path) as ver_file:
     exec(ver_file.read(), main_ns)
-
- print("Special considerations need to be taken for Windows and OSX users.")
- print("Read more at https://github.com/wileyyugioh/kissanime_dl/blob/master/README.md")
 
 setup(name='kissanime_dl',
 	version=main_ns['__version__'],
