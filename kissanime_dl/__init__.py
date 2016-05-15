@@ -475,16 +475,19 @@ def main():
 
 	if(url != "update"):
 
+		#Makes sure to connect to valid-ish urls.
 		if("https://" not in url and "http://" not in url or "/Anime/" not in url):
 			printClr(url + " is not a valid url!", Color.BOLD, Color.RED)
 			return
 
+		#Makes sure okay connection to site
 		if(requests.head(url).status_code != requests.codes.ok and requests.head(url).status_code != 503):
 			printClr(url + " is not a valid url!", Color.BOLD, Color.RED)
 			return
+
 	else:
 		#grab the urls
-		#assumes first arg is update
+		#this bit first arg is update
 
 		#check if file exists
 		if(not os.path.isfile(PATH_TO_HISTORY) ):
@@ -510,6 +513,12 @@ def main():
 	r = sess.get(url, timeout=30.0)
 	if verbose:
 		print("Started session at " + url)
+
+	if(r.status_code != requests.codes.ok and r.status_code != 503):
+		#Bad connection to site
+		printClr("Failed to get a good status code with site", Color.BOLD, Color.RED)
+		return;
+
 	tree = html.fromstring(r.content)
 	script = findBetween(r.text, "<script", "</script>")
 	strip_script = [stri.strip() for stri in script.splitlines()]
