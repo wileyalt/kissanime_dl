@@ -26,8 +26,9 @@ js2py
 #Installation
 ##*nix or OSX:
 
+For some odd reason, this requires sudo for lxml 3.6.0
 ```
-STATIC_DEPS=true pip install lxml==3.6.0
+STATIC_DEPS=true sudo -H pip install lxml==3.6.0
 pip install kissanime_dl
 ```
 
