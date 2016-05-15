@@ -1,9 +1,6 @@
 from setuptools import setup
 from distutils.util import convert_path
 
-print("Special considerations need to be taken for Windows and OSX users.")
-print("Read more at https://github.com/wileyyugioh/kissanime_dl/blob/master/README.md")
-
 main_ns = {}
 ver_path = convert_path('kissanime_dl/version.py')
 with open(ver_path) as ver_file:
