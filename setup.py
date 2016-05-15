@@ -16,7 +16,7 @@ setup(name='kissanime_dl',
 	packages=['kissanime_dl'],
 	install_requires=[
 	'requests==2.9.1',
-	'lxml>=3.5.0',
+	'lxml==3.5.0',
 	'js2py==0.35',
 	],
 	zip_safe=False,
