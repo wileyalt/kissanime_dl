@@ -60,37 +60,6 @@ where PATH_LXML is the path to the lxml wheel you downloaded.
 
 Then, try to reinstall.
 
-**FOR ALL WINDOWS INSTALLATIONS**
-
-**BUT WAIT, THERE'S MORE**
-
-Due to a bug in pip, the script it generates is broken, and needs to be manually fixed.
-
-Type in 
-```
-pip show kissanime-dl
-```
-
-and go up the filesystem to the pythonXX\Scripts directory, where there should be a file named
-```
-kissanime-dl-script.py
-```
-open it in a text editor and change
-```
-#!LONG, LONG, PATH
-```
-to 
-```
-#!"LONG, LONG, PATH"
-```
-This is because spaces in the path name screw everything up, and that bug in pip still hasn't been fixed.
-
-Everything should be installed properly, and this can be verified by typing into cmd:
-```
-kissanime-dl
-```
-
-
 #Usage:
 ```
 
