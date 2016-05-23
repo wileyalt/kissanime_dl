@@ -451,6 +451,10 @@ def main():
 				printError()
 				return;
 
+	if (len(sys.argv) == 1):
+		printError()
+		return
+
 	if(len(sys.argv) < 3):
 		printClr("Error: kissanime_dl takes in 2 args, the url, and the path to download to", Color.BOLD, Color.RED)
 		printError()
