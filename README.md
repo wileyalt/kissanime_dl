@@ -32,6 +32,29 @@ STATIC_DEPS=true sudo -H pip install lxml==3.6.0
 pip install kissanime_dl
 ```
 
+Alternative installation instructions for Linux if facing problems with  `pip`
+```
+# Remove problematic pip install
+sudo apt-get remove python-pip
+
+# Install dependencies
+sudo apt-get install python-setuptools libxslt1-dev python-dev zlib1g-dev
+sudo easy_install pip
+sudo pip install --upgrade requests
+sudo pip install js2py
+sudo easy_install lxml==3.6.0
+
+# Install kissanime_dl
+pip install -U kissanime_dl
+```
+
+Note :  If  `pip install -U kissanime_dl`  is run with root privileges,
+        the module throws errors if update is available. This happens
+        as the module is unable to write to its install directory to
+        perform the update. The solution to this is to either not
+        install module with root privileges or run download as root
+        once an update is available and normally after that
+
 ##Windows:
 
 Windows is a tricky one.
@@ -70,7 +93,7 @@ kissanime-dl URL PATH_TO_DOWNLOAD OPT_ARGS
 MAKE SURE THAT kissanime_dl RUNS IN SEPARATE DIRECTORIES FOR DIFFERENT URLS, OR ELSE UPDATE WILL BE SCREWY
 ####
 
-First argument: the url to the kissanime.to/Anime/* page. It can also be "update" which will download any videos not downloaded into the folder. 
+First argument: the url to the kissanime.to/Anime/* page. It can also be "update" which will download any videos not downloaded into the folder.
 "update" can only be used if kissanime_dl has been run in that directory and has generated a history file
 
 Second argument: the path to download files to
@@ -85,11 +108,11 @@ Optional arguments:
 	If only OPT_BEG is given WITHOUT "%", only one episode will be downloaded.
 	If only OPT_BEG is given WITH "%", then all files after OPT_BEG will be downloaded.
 	If only OPT_END is given WITH "%", then all files before OPT_END will be downloaded.
-	If OPT_BEG and OPT_END is given, then a range between the two will be downloaded. 
-	"%" literal needs to be between the two. 
+	If OPT_BEG and OPT_END is given, then a range between the two will be downloaded.
+	"%" literal needs to be between the two.
 	OPT_BEG needs to be above OPT_END in terms of the page
 
---max_threads=VAL: Sets the max_threads to search for the download urls. 
+--max_threads=VAL: Sets the max_threads to search for the download urls.
 	The threads for the actual downloading is not affected.
 	The actual downloading uses one thread per file
 
@@ -104,7 +127,7 @@ Optional arguments:
 	This is good for manually setting files you don't want to download when updating
 
 —-openload
-	Puts priority to using openload as host. 
+	Puts priority to using openload as host.
 
 —noupdate
 	Prevents kissanime_dl from autoupdating
