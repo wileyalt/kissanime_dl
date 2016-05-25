@@ -126,12 +126,13 @@ def writeHistory(urls_arr, PATH_TO_HISTORY, masterurl):
 #cross version
 def cVunicode(any):
 	try:
-		return unicode(any)
+		return unicode(any, utf8)
 	except NameError:
 		return str(any)
 
 def downloadFile(url, dl_path, PATH_TO_HISTORY, masterurl):
 	dl_name = cVunicode(url[NAME])
+	dl_path = cVunicode(dl_path)
 	if(len(dl_name) > 252):
 		dl_name = dl_name[:252]
 
