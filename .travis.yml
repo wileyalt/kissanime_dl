@@ -7,4 +7,4 @@ python:
 install:
   -  pip install .
   
-script: kissanime-dl https://kissanime.to/Anime/Naruto-Shippuuden-Dub . --simulate --verbose --openload
+script: mkdir testàéè && kissanime-dl https://kissanime.to/Anime/Naruto-Shippuuden testàéè --simulate --verbose --openload
