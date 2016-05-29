@@ -76,7 +76,7 @@ setup(name='kissanime_dl',
 	'requests==2.9.1',
 	'lxml>=3.5.0',
 	'js2py==0.35',
-    'pycrypto==2.6.1'
+    'pycryptodome==3.4'
 	],
 	zip_safe=False,
 	entry_points = {
