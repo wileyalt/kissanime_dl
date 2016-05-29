@@ -55,6 +55,11 @@ try:
 except ImportError:
 	from .js_exc_decode import jsdecode
 
+try:
+	from kissenc import kissenc
+except ImportError:
+	from .kissenc import kissenc
+
 #GOTTA GET THAT VERSION
 #Get python version
 PYTHON_VER = sys.version_info[0]
@@ -201,6 +206,9 @@ def decodeAA(text):
 
 def decodeFunky(text):
 	return jsdecode(text)
+
+def decodeKissenc(text):
+	return kissenc(text)
 
 def wrap(string):
 	alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
@@ -873,8 +881,6 @@ def main():
 
 			return ft
 
-		#debugging
-		print(raw_data[0])
 		format_txt = sanitize(raw_data[0])
 
 		#With email protection, sometimes only the [ is shown
@@ -889,10 +895,21 @@ def main():
 			printClr("Defaulting to highest quality", Color.BOLD)
 			dl_url_x_path = DOWNLOAD_URL_X_PATH_DEFAULT
 
-		queuee.put([format_txt, wrap(temp_tree.xpath(dl_url_x_path)[0]), link])
+		discovered_url = ""
+
+		if("/Anime/" in link):
+			#site is kissanime
+			discovered_url = wrap(temp_tree.xpath(dl_url_x_path)[0])
+		elif("/Cartoon/" in link):
+			discovered_url = decodeKissenc(temp_tree.xpath(dl_url_x_path)[0])
+
+		#TODO
+		#ADD /DRAMA/ SUPPORT
+
+		queuee.put([format_txt, discovered_url, link])
 		if(verbose):
 			print_mu.acquire()
-			print("Found download link: " + wrap(temp_tree.xpath(dl_url_x_path)[0] ) )
+			print("Found download link: " + discovered_url)
 			print("Found file name: " + format_txt)
 			print_mu.release()
 
