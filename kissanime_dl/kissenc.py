@@ -49,7 +49,7 @@ def kissencCartoon(raw_str):
 	jj = base64.b64decode(raw_str)
 	filled = cartoon_i.decrypt(jj)
 	
-	return pkc.decode(filled)
+	return pkc.decode(filled).decode('utf8')
 
 def kissencAsian(raw_str, sess):
 	#requires a session because the js makes an ajax request
@@ -63,8 +63,8 @@ def kissencAsian(raw_str, sess):
 	jj = base64.b64decode(raw_str)
 
 	filled = asian_g.decrypt(jj)
-	return pkc.decode(filled)
+	return pkc.decode(filled).decode('utf8')
 
 def kissencAnime(raw_str):
-	return base64.b64decode(raw_str)
+	return base64.b64decode(raw_str).decode('utf8')
 

@@ -40,7 +40,12 @@ class PKCS7Encoder(object):
         Remove the PKCS#7 padding from a text string
         '''
         nl = len(text)
-        val = int(binascii.hexlify(text[-1]), 16)
+
+        try:
+            val = int(binascii.hexlify(text[-1]), 16)
+        except TypeError:
+            val = text[-1]
+			
         if val > self.k:
             raise ValueError('Input is not padded or padding is corrupt')
 
