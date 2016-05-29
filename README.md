@@ -23,6 +23,8 @@ requests
 
 js2py
 
+pycryptodome
+
 #Installation
 ##*nix or OSX:
 
