@@ -58,7 +58,6 @@ def kissencAsian(raw_str, sess):
 	asian_sha = post_data.text.encode('utf8')
 	asian_obj_sha = SHA256.new(asian_sha)
 	asian_a = binascii.unhexlify(asian_obj_sha.hexdigest() )
-	print(asian_a)
 
 	asian_g = AES.new(asian_a, AES.MODE_CBC, asian_f)
 	jj = base64.b64decode(raw_str)
