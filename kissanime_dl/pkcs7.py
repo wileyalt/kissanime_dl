@@ -1,7 +1,11 @@
 #from https://github.com/janglin/crypto-pkcs7-example/blob/master/pkcs7.py
 
 import binascii
-import StringIO
+
+try:
+    import StringIO
+except ImportError:
+    from io import StringIO
 
 class PKCS7Encoder(object):
     '''

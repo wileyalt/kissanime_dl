@@ -207,17 +207,14 @@ def decodeAA(text):
 def decodeFunky(text):
 	return jsdecode(text)
 
-def decodeKissenc(text):
-	return kissenc(text)
-
 def wrap(string):
 	alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
 	lookup = {}
 	#cross version unichr
 	def cVunichr(any):
-		if(PYTHON_VER < 3):
+		try:
 			return unichr(any)
-		else:
+		except NameError:
 			return chr(any)
 
 	def fromUTF8(string):
@@ -512,7 +509,7 @@ def main():
 		thehead = requests.head(url)
 		if(thehead.status_code != requests.codes.ok and thehead.status_code != 503):
 			printClr("Failed to get a good status code at " + url, Color.BOLD, Color.RED)
-			printClr("Status Code: " + thehead.status_code, Color.BOLD, Color.RED)
+			printClr("Status Code: " + str(thehead.status_code), Color.BOLD, Color.RED)
 			return
 
 	else:
@@ -901,7 +898,7 @@ def main():
 			#site is kissanime
 			discovered_url = wrap(temp_tree.xpath(dl_url_x_path)[0])
 		elif("/Cartoon/" in link):
-			discovered_url = decodeKissenc(temp_tree.xpath(dl_url_x_path)[0])
+			discovered_url = kissencCartoon(temp_tree.xpath(dl_url_x_path)[0])
 
 		#TODO
 		#ADD /DRAMA/ SUPPORT
