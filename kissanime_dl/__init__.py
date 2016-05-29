@@ -825,7 +825,6 @@ def main():
 			discovered_url = kissencCartoon(temp_tree.xpath(dl_url_x_path)[0])
 		elif("/Drama/" in link):
 			#site is kissasian
-			print(temp_tree.xpath(dl_url_x_path)[0])
 			discovered_url = kissencAsian(temp_tree.xpath(dl_url_x_path)[0], ses)
 		else:
 			#unknown site
