@@ -56,9 +56,9 @@ except ImportError:
 	from .js_exc_decode import jsdecode
 
 try:
-	from kissenc import kissenc
+	from kissenc import kissencCartoon, kissencAsian
 except ImportError:
-	from .kissenc import kissenc
+	from .kissenc import kissencCartoon, kissencAsian
 
 #GOTTA GET THAT VERSION
 #Get python version
@@ -208,84 +208,8 @@ def decodeFunky(text):
 	return jsdecode(text)
 
 def wrap(string):
-	alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
-	lookup = {}
-	#cross version unichr
-	def cVunichr(any):
-		try:
-			return unichr(any)
-		except NameError:
-			return chr(any)
-
-	def fromUTF8(string):
-		pos = -1
-		leng = 0
-		buff = []
-		enc = [0] * 4
-		if(len(lookup) == 0):
-			leng = len(alphabet)
-			while(pos < leng - 1):
-				pos += 1
-				lookup[alphabet[pos]] = pos
-			pos = -1
-		leng = len(string)
-		while(pos < leng):
-			try:
-				pos += 1 #++pos
-				if(pos == leng):
-					break
-				enc[0] = lookup[string[pos] ]
-				pos += 1 #++pos
-				enc[1] = lookup[string[pos] ]
-				buff.append((enc[0] << 2) | (enc[1] >> 4) )
-				pos += 1 #++pos
-				enc[2] = lookup[string[pos] ]
-				if(enc[2] == 64):
-					break
-				buff.append(((enc[1] & 15) << 4) | (enc[2] >> 2))
-				pos += 1 #++pos
-				enc[3] = lookup[string[pos] ]
-				if(enc[3] == 64):
-					break
-				buff.append(((enc[2] & 3) << 6) | enc[3])
-			except:
-				print(string)
-				print(leng)
-				print(pos)
-				print(string[pos])
-				raise
-
-		return buff
-
-	if(len(string) % 4):
-		print("Wrap failed")
-		raise ValueError("Wrap failed")
-
-	buff = fromUTF8(string)
-	position = 0
-	leng = len(buff)
-
-	result = ''
-	while(position < leng):
-		if(buff[position] < 128):
-			result += cVunichr(buff[position])
-			position += 1
-		elif(buff[position] > 191 and buff[position] < 224):
-			first = ((buff[position] & 31) << 6)
-			position += 1
-			second = (buff[position] & 63)
-			position += 1
-			result += cVunichr(first | second);
-		else:
-			first = ((buff[position] & 15) << 12)
-			position += 1
-			second = ((buff[position] & 63) << 6)
-			position += 1
-			third = (buff[position] & 63)
-			position += 1
-			result += cVunichr(first | second | third)
-
-	return ''.join(result)
+	#Removed old function because Kissanime encodes it as base64
+	return string.decode('base64')
 
 def printError():
 	printClr("The first argument is the url or update", Color.BOLD)
@@ -898,7 +822,15 @@ def main():
 			#site is kissanime
 			discovered_url = wrap(temp_tree.xpath(dl_url_x_path)[0])
 		elif("/Cartoon/" in link):
+			#site is kisscartoon
 			discovered_url = kissencCartoon(temp_tree.xpath(dl_url_x_path)[0])
+		elif("/Drama/" in link):
+			#site is kissasian
+			discovered_url = kissencAsian(temp_tree.xpath(dl_url_x_path)[0])
+		else:
+			#unknown site
+			printClr("Error in finding method to decode video url from " + link, Color.RED, Color.BOLD)
+			return False
 
 		#TODO
 		#ADD /DRAMA/ SUPPORT
