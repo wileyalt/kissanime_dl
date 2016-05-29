@@ -30,7 +30,6 @@ import threading
 import time
 import shutil
 import json
-import math
 
 try:
 	#python2
@@ -246,7 +245,6 @@ def getElapsedTime(s_time):
 
 # MAIN
 def main():
-
 	#required for py2js
 	sys.setrecursionlimit(6000)
 
@@ -407,18 +405,21 @@ def main():
 	if(url != "update"):
 
 		#Makes sure to connect to valid-ish urls.
-		valid_url = {
+		valid_begin = {
 			"kissanime.to",
 			"kisscartoon.me",
-			"kissasian.com",
+			"kissasian.com"
+		}
+
+		valid_end = {
 			"/Anime/",
 			"/Cartoon/",
 			"/Drama/"
-
 		}
 
-		vurl_result = [i for i in valid_url if i in url]
-		vurl_result[-1] = "http://" + vurl_result[-1]
+		vurl_result = [i for i in valid_begin if i in url]
+		vurl_result += [i for i in valid_end if i in url]
+		vurl_result[0] = "http://" + vurl_result[0]
 
 		if("https://" not in url and "http://" not in url or len(vurl_result) < 2):
 			printClr(url + " is not a valid url!", Color.BOLD, Color.RED)
@@ -532,7 +533,7 @@ def main():
 	#wait for 4 sec
 	time.sleep(4)
 
-	URL_SEND_PAYLOAD_TO = vurl_result[-1] + "/cdn-cgi/l/chk_jschl"
+	URL_SEND_PAYLOAD_TO = vurl_result[0] + "/cdn-cgi/l/chk_jschl"
 	sess.get(URL_SEND_PAYLOAD_TO, params=payload, timeout=30.0)
 
 	r = sess.get(url, timeout=30.0)
@@ -548,7 +549,9 @@ def main():
 		return
 
 	printClr("Success!", Color.BOLD, Color.GREEN)
+
 	#ASSUMING PAGE IS LOADED STARTING HERE
+
 	tree = html.fromstring(r.content)
 
 	LINK_TABLE_X_PATH = "//table[@class='listing']/tr/td/a"
@@ -783,10 +786,10 @@ def main():
 		raw_data = temp_tree.xpath(DOWNLOAD_NAME)
 
 		if(len(raw_data) == 0):
-				return False
+			return False
 
-					#             NAME                            DOWNLOAD_URL
 		def sanitize(funky_str):
+			#removes all those escape chars from the string
 			try:
 				ft = funky_str.replace(" ", '').translate(None, escapes)
 			except TypeError:
@@ -822,14 +825,12 @@ def main():
 			discovered_url = kissencCartoon(temp_tree.xpath(dl_url_x_path)[0])
 		elif("/Drama/" in link):
 			#site is kissasian
-			discovered_url = kissencAsian(temp_tree.xpath(dl_url_x_path)[0])
+			print(temp_tree.xpath(dl_url_x_path)[0])
+			discovered_url = kissencAsian(temp_tree.xpath(dl_url_x_path)[0], ses)
 		else:
 			#unknown site
 			printClr("Error in finding method to decode video url from " + link, Color.RED, Color.BOLD)
 			return False
-
-		#TODO
-		#ADD /DRAMA/ SUPPORT
 
 		queuee.put([format_txt, discovered_url, link])
 		if(verbose):
@@ -854,7 +855,7 @@ def main():
 		except:
 			return
 
-	CHUNK_SIZE = int(math.ceil(len(vid_links) / float(MAX_THREADS ) ) )
+	CHUNK_SIZE = int(round(len(vid_links) / float(MAX_THREADS) ) )
 	dl_urls = Queue()
 	thrs = []
 	for i in range(MAX_THREADS):

@@ -9,6 +9,7 @@ except ImportError:
 from Crypto.Protocol import KDF
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
+import requests
 
 #lets cache those values!
 
@@ -30,12 +31,14 @@ cartoon_l = KDF.PBKDF2(cartoon_g, cartoon_h)
 
 #START ASIAN
 
-#in 256
-asian_sha = "m5hSrOWimSmb4Y5I3".encode('utf8')
-asian_obj_sha = SHA256.new(asian_sha)
-asian_a = asian_obj_sha.hexdigest().decode('hex')
 asian_c = "32b812e9a1321ae0e84af660c4722b3a".encode('utf8')
 asian_f = asian_c.decode('hex')
+
+#assumes site domain is kissasian.com
+asian_topost = 'http://kissasian.com/External/RSK'
+asian_headers = {
+	'X-Requested-With': 'XMLHttpRequest'
+}
 
 #END ASIAN
 
@@ -46,7 +49,14 @@ def kissencCartoon(raw_str):
 	
 	return pkc.decode(filled)
 
-def kissencAsian(raw_str):
+def kissencAsian(raw_str, sess):
+	#requires a session because the js makes an ajax request
+    #in 256
+	post_data = sess.post(asian_topost, headers=asian_headers)
+	asian_sha = post_data.text
+	asian_obj_sha = SHA256.new(asian_sha)
+	asian_a = asian_obj_sha.hexdigest().decode('hex')
+
 	asian_g = AES.new(asian_a, AES.MODE_CBC, asian_f)
 	jj = raw_str.decode('base64')
 
