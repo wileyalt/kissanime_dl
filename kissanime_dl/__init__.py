@@ -799,6 +799,9 @@ def main():
 					#python 2
 					ft = funky_str.replace(" ", '').translate(dict.fromkeys(escapes) )
 
+			#remove anything after newline
+			ft = re.sub(r'\n(.*)$', '', ft)
+
 			return ft
 
 		format_txt = sanitize(raw_data[0])

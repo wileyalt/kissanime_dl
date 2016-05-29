@@ -55,9 +55,10 @@ def kissencAsian(raw_str, sess):
 	#requires a session because the js makes an ajax request
     #in 256
 	post_data = sess.post(asian_topost, headers=asian_headers)
-	asian_sha = post_data.text
+	asian_sha = post_data.text.encode('utf8')
 	asian_obj_sha = SHA256.new(asian_sha)
 	asian_a = binascii.unhexlify(asian_obj_sha.hexdigest() )
+	print(asian_a)
 
 	asian_g = AES.new(asian_a, AES.MODE_CBC, asian_f)
 	jj = base64.b64decode(raw_str)
