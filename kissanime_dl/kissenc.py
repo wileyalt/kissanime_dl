@@ -10,6 +10,8 @@ from Crypto.Protocol import KDF
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
 import requests
+import binascii
+import base64
 
 #lets cache those values!
 
@@ -22,7 +24,7 @@ pkc = PKCS7Encoder()
 #START CARTOON
 
 cartoon_hex = "a5e8d2e9c1721ae0e84ad660c472c1f3".encode('utf8')
-cartoon_k = cartoon_hex.decode('hex')
+cartoon_k = binascii.unhexlify(cartoon_hex)
 cartoon_g = "WrxLl3rnA48iafgCy".encode('utf8')
 cartoon_h = "CartKS$2141#".encode('utf8')
 cartoon_l = KDF.PBKDF2(cartoon_g, cartoon_h)
@@ -32,7 +34,7 @@ cartoon_l = KDF.PBKDF2(cartoon_g, cartoon_h)
 #START ASIAN
 
 asian_c = "32b812e9a1321ae0e84af660c4722b3a".encode('utf8')
-asian_f = asian_c.decode('hex')
+asian_f = binascii.unhexlify(asian_c)
 
 #assumes site domain is kissasian.com
 asian_topost = 'http://kissasian.com/External/RSK'
@@ -44,7 +46,7 @@ asian_headers = {
 
 def kissencCartoon(raw_str):
 	cartoon_i = AES.new(cartoon_l, AES.MODE_CBC, cartoon_k)
-	jj = raw_str.decode('base64')
+	jj = base64.b64decode(raw_str)
 	filled = cartoon_i.decrypt(jj)
 	
 	return pkc.decode(filled)
@@ -58,11 +60,11 @@ def kissencAsian(raw_str, sess):
 	asian_a = asian_obj_sha.hexdigest().decode('hex')
 
 	asian_g = AES.new(asian_a, AES.MODE_CBC, asian_f)
-	jj = raw_str.decode('base64')
+	jj = base64.b64decode(raw_str)
 
 	filled = asian_g.decrypt(jj)
 	return pkc.decode(filled)
 
 def kissencAnime(raw_str):
-	return raw_str.decode('base64')
+	return base64.b64decode(raw_str)
 
