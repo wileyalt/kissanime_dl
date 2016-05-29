@@ -3,8 +3,8 @@
 [![Build Status](https://travis-ci.org/wileyyugioh/kissanime_dl.svg?branch=master)](https://travis-ci.org/wileyyugioh/kissanime_dl)
 
 
-Downloads all mp4s from a kissanime mastersite!
-(kissanime.to/Anime/*)
+Downloads all mp4s from a kissanime, kisscartoon, or kissasian mastersite!
+(kissanime.to/Anime/*, kisscartoon.me/Cartoon/*, kissasian.com/Drama/)
 
 ##Currently supports as hosts:
 
@@ -96,7 +96,7 @@ kissanime-dl URL PATH_TO_DOWNLOAD OPT_ARGS
 MAKE SURE THAT kissanime_dl RUNS IN SEPARATE DIRECTORIES FOR DIFFERENT URLS, OR ELSE UPDATE WILL BE SCREWY
 ####
 
-First argument: the url to the kissanime.to/Anime/* page. It can also be "update" which will download any videos not downloaded into the folder.
+First argument: the url to the kiss-site master page. It can also be "update" which will download any videos not downloaded into the folder.
 "update" can only be used if kissanime_dl has been run in that directory and has generated a history file
 
 Second argument: the path to download files to
