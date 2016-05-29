@@ -56,9 +56,9 @@ except ImportError:
 	from .js_exc_decode import jsdecode
 
 try:
-	from kissenc import kissencCartoon, kissencAsian
+	from kissenc import kissencCartoon, kissencAsian, kissencAnime
 except ImportError:
-	from .kissenc import kissencCartoon, kissencAsian
+	from .kissenc import kissencCartoon, kissencAsian, kissencAnime
 
 #GOTTA GET THAT VERSION
 #Get python version
@@ -206,10 +206,6 @@ def decodeAA(text):
 
 def decodeFunky(text):
 	return jsdecode(text)
-
-def wrap(string):
-	#Removed old function because Kissanime encodes it as base64
-	return string.decode('base64')
 
 def printError():
 	printClr("The first argument is the url or update", Color.BOLD)
@@ -820,7 +816,7 @@ def main():
 
 		if("/Anime/" in link):
 			#site is kissanime
-			discovered_url = wrap(temp_tree.xpath(dl_url_x_path)[0])
+			discovered_url = kissencAnime(temp_tree.xpath(dl_url_x_path)[0])
 		elif("/Cartoon/" in link):
 			#site is kisscartoon
 			discovered_url = kissencCartoon(temp_tree.xpath(dl_url_x_path)[0])
