@@ -284,7 +284,8 @@ def wrap(string):
 
 def printError():
 	printClr("The first argument is the url or update", Color.BOLD)
-	print("    Update can only be given if kissanime_dl has been run in that directory before")
+	print("    'update' can only be given if kissanime_dl has been run in that directory before")
+	print("    The url can be from kissanime.to, kisscartoon.me, and kissjapan.com")
 	printClr("The second argument is the path to download to", Color.BOLD)
 	printClr("An optional argument is --verbose", Color.BOLD)
 	printClr("An optional argument is --simulate.", Color.BOLD)
@@ -481,13 +482,29 @@ def main():
 	if(url != "update"):
 
 		#Makes sure to connect to valid-ish urls.
-		if("https://" not in url and "http://" not in url or "/Anime/" not in url):
+		valid_url = {
+			"kissanime.to",
+			"kisscartoon.me",
+			"kissasian.com",
+			"/Anime/",
+			"/Cartoon/",
+			"/Drama/"
+
+		}
+
+		vurl_result = [i for i in valid_url if i in url]
+		vurl_result[-1] = "http://" + vurl_result[-1]
+
+		if("https://" not in url and "http://" not in url or len(vurl_result) < 2):
 			printClr(url + " is not a valid url!", Color.BOLD, Color.RED)
 			return
 
+
 		#Makes sure okay connection to site
-		if(requests.head(url).status_code != requests.codes.ok and requests.head(url).status_code != 503):
-			printClr(url + " is not a valid url!", Color.BOLD, Color.RED)
+		thehead = requests.head(url)
+		if(thehead.status_code != requests.codes.ok and thehead.status_code != 503):
+			printClr("Failed to get a good status code at " + url, Color.BOLD, Color.RED)
+			printClr("Status Code: " + thehead.status_code, Color.BOLD, Color.RED)
 			return
 
 	else:
@@ -515,6 +532,8 @@ def main():
 	#begin session
 	sess = requests.Session()
 	sess.keep_alive = True
+	sess.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"
+
 	r = sess.get(url, timeout=30.0)
 	if verbose:
 		print("Started session at " + url)
@@ -544,11 +563,6 @@ def main():
 	js_var_t = "<a href='/'>x</a>"
 	#root("/") url
 	js_var_t_href = '{uri.scheme}://{uri.netloc}/'.format(uri=urlparse(url))
-
-	if("https://kissanime.to" not in js_var_t_href):
-		printClr(url + "does not go to kissanime.to!", Color.BOLD, Color.RED)
-		printError()
-		return
 
 	try:
 		js_var_r = re.search(r"https?:\/\/", js_var_t_href).group(0)
@@ -593,12 +607,12 @@ def main():
 	#wait for 4 sec
 	time.sleep(4)
 
-	URL_SEND_PAYLOAD_TO = "https://kissanime.to/cdn-cgi/l/chk_jschl"
+	URL_SEND_PAYLOAD_TO = vurl_result[-1] + "/cdn-cgi/l/chk_jschl"
 	sess.get(URL_SEND_PAYLOAD_TO, params=payload, timeout=30.0)
 
 	r = sess.get(url, timeout=30.0)
 
-	URL_ERROR_URL = "https://kissanime.to/Error"
+	URL_ERROR_URL = vurl_result[-1] + "/Error"
 	if(r.url == URL_ERROR_URL):
 		printClr("Url error at " + url, Color.BOLD, Color.RED)
 		print("Check your url and try again")
@@ -859,6 +873,8 @@ def main():
 
 			return ft
 
+		#debugging
+		print(raw_data[0])
 		format_txt = sanitize(raw_data[0])
 
 		#With email protection, sometimes only the [ is shown

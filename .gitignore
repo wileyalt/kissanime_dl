@@ -11,3 +11,6 @@
 
 # PyCharm config folder
 .idea/
+
+#My debugging folder
+/debug/
