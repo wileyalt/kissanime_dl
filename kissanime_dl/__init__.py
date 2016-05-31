@@ -402,24 +402,24 @@ def main():
 		printError()
 		return
 
+	#Makes sure to connect to valid-ish urls.
+	valid_begin = {
+		"kissanime.to",
+		"kisscartoon.me",
+		"kissasian.com"
+	}
+
+	valid_end = {
+		"/Anime/",
+		"/Cartoon/",
+		"/Drama/"
+	}
+
+	vurl_result = [i for i in valid_begin if i in url]
+	vurl_result += [i for i in valid_end if i in url]
+	vurl_result[0] = "http://" + vurl_result[0]
+
 	if(url != "update"):
-
-		#Makes sure to connect to valid-ish urls.
-		valid_begin = {
-			"kissanime.to",
-			"kisscartoon.me",
-			"kissasian.com"
-		}
-
-		valid_end = {
-			"/Anime/",
-			"/Cartoon/",
-			"/Drama/"
-		}
-
-		vurl_result = [i for i in valid_begin if i in url]
-		vurl_result += [i for i in valid_end if i in url]
-		vurl_result[0] = "http://" + vurl_result[0]
 
 		if("https://" not in url and "http://" not in url or len(vurl_result) < 2):
 			printClr(url + " is not a valid url!", Color.BOLD, Color.RED)
@@ -444,11 +444,13 @@ def main():
 			return
 
 	magiclink = {}
+
+	#load update file to prevent redownloading
+	if(os.path.isfile(PATH_TO_HISTORY) == True):
+		with open(PATH_TO_HISTORY) as f:
+			magiclink = json.load(f)
+	
 	if(url == "update"):
-		#set url to master link
-		if(os.path.isfile(PATH_TO_HISTORY) == True):
-			with open(PATH_TO_HISTORY) as f:
-				magiclink = json.load(f)
 		url = magiclink[JSON_HIS_MASTER_LINK_KEY]
 
 		if(verbose):
