@@ -59,6 +59,11 @@ try:
 except ImportError:
 	from .kissenc import kissencCartoon, kissencAsian, kissencAnime
 
+try:
+	from validhead import valid_begin, valid_end
+except ImportError:
+	from .validhead import valid_begin, valid_end
+
 #GOTTA GET THAT VERSION
 #Get python version
 PYTHON_VER = sys.version_info[0]
@@ -402,26 +407,42 @@ def main():
 		printError()
 		return
 
+	if(url == "update"):
+		#grab the urls
+		#if update is passed in
+
+		#check if update file exists
+		if(not os.path.isfile(PATH_TO_HISTORY) ):
+			printClr("Cannot update videos when kissanime_dl has never been run at " + dl_path, Color.BOLD, Color.RED)
+			printClr("Make sure that " + LINK_HISTORY_FILE_NAME + " exists at that directory", Color.BOLD)
+			return
+
+	magiclink = {}
+
+	#load update file if it exists to prevent redownloading
+	if(os.path.isfile(PATH_TO_HISTORY) == True):
+		with open(PATH_TO_HISTORY) as f:
+			magiclink = json.load(f)
+
+	if(url == "update"):
+		url = magiclink[JSON_HIS_MASTER_LINK_KEY]
+		if(verbose):
+			print("Found url from history: " + url)
+	
+	if(url != magiclink[JSON_HIS_MASTER_LINK_KEY] ):
+		#check to make sure that what is being passed in is in a new directory or the same url
+		printClr("The url passed in does not match the url(" + magiclink[JSON_HIS_MASTER_LINK_KEY] + ")present in " + LINK_HISTORY_FILE_NAME, Color.BOLD, Color.RED)
+		printClr("Try running kissanime_dl in another directory", Color.BOLD)
+		return
+
 	#Makes sure to connect to valid-ish urls.
-	valid_begin = {
-		"kissanime.to",
-		"kisscartoon.me",
-		"kissasian.com"
-	}
-
-	valid_end = {
-		"/Anime/",
-		"/Cartoon/",
-		"/Drama/"
-	}
-
 	vurl_result = [i for i in valid_begin if i in url]
 	vurl_result += [i for i in valid_end if i in url]
 	vurl_result[0] = "http://" + vurl_result[0]
 
 	if(url != "update"):
 
-		if("https://" not in url and "http://" not in url or len(vurl_result) < 2):
+		if(len(vurl_result) < 2):
 			printClr(url + " is not a valid url!", Color.BOLD, Color.RED)
 			return
 
@@ -432,29 +453,6 @@ def main():
 			printClr("Failed to get a good status code at " + url, Color.BOLD, Color.RED)
 			printClr("Status Code: " + str(thehead.status_code), Color.BOLD, Color.RED)
 			return
-
-	else:
-		#grab the urls
-		#this bit first arg is update
-
-		#check if file exists
-		if(not os.path.isfile(PATH_TO_HISTORY) ):
-			printClr("Cannot update videos when kissanime_dl has never been run at " + dl_path, Color.BOLD, Color.RED)
-			printClr("Make sure that " + LINK_HISTORY_FILE_NAME + " exists at that directory", Color.BOLD)
-			return
-
-	magiclink = {}
-
-	#load update file to prevent redownloading
-	if(os.path.isfile(PATH_TO_HISTORY) == True):
-		with open(PATH_TO_HISTORY) as f:
-			magiclink = json.load(f)
-	
-	if(url == "update"):
-		url = magiclink[JSON_HIS_MASTER_LINK_KEY]
-
-		if(verbose):
-			print("Found url from history: " + url)
 
 
 	#begin session
