@@ -429,11 +429,11 @@ def main():
 		if(verbose):
 			print("Found url from history: " + url)
 	
-	if(url != magiclink[JSON_HIS_MASTER_LINK_KEY] ):
-		#check to make sure that what is being passed in is in a new directory or the same url
-		printClr("The url passed in does not match the url(" + magiclink[JSON_HIS_MASTER_LINK_KEY] + ")present in " + LINK_HISTORY_FILE_NAME, Color.BOLD, Color.RED)
-		printClr("Try running kissanime_dl in another directory", Color.BOLD)
-		return
+		if(url != magiclink[JSON_HIS_MASTER_LINK_KEY] ):
+			#check to make sure that what is being passed in is in a new directory or the same url
+			printClr("The url passed in does not match the url(" + magiclink[JSON_HIS_MASTER_LINK_KEY] + ")present in " + LINK_HISTORY_FILE_NAME, Color.BOLD, Color.RED)
+			printClr("Try running kissanime_dl in another directory", Color.BOLD)
+			return
 
 	#Makes sure to connect to valid-ish urls.
 	vurl_result = [i for i in valid_begin if i in url]
