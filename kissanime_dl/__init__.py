@@ -679,19 +679,22 @@ def main():
 		if(len(lxml_parse.xpath(SEL_SER_OPT) ) == 0):
 			return False;
 
+		find_str = r"""<iframe(.*|\n)?src=\"https?:\/\/openload.co(.*?)\""""
+
 		try:
-			raw_data = re.search(r"""\$\('#divContentVideo'\)\.html\('<iframe.*src=\"(.*?)\"""", html_str).group(1)
+			raw_data = re.search(find_str, html_str).group(1)
 		except AttributeError as e:
 			printClr("Regex Failure", Color.RED, Color.BOLD)
-			printClr("Could not find '<iframe.*src=\"(.*?)\"' in the html", Color.RED, Color.BOLD)
+			printClr("Could not find '" + find_str + "'", Color.RED, Color.BOLD)
 			return False;
 		except TypeError:
-			raw_data = re.search(r"""\$\('#divContentVideo'\)\.html\('<iframe.*src=\"(.*?)\"""", html_str.decode(html_raw.encoding) ).group(1)
+			raw_data = re.search(find_str, html_str.decode(html_raw.encoding) ).group(1)
 		except:
 			printClr("Unknown Regex Error", Color.RED, Color.BOLD)
-			printClr("Pattern: <iframe.*src=\"(.*?)\"", Color.RED, Color.BOLD)
+			printClr("Pattern: " + find_str, Color.RED, Color.BOLD)
 			return False;
 
+		raw_data = "http://openload.co"
 		raw_data = raw_data.replace("embed", "f")
 
 		mu.acquire()
@@ -822,7 +825,7 @@ def main():
 			discovered_url = kissencAnime(temp_tree.xpath(dl_url_x_path)[0])
 		elif("/Cartoon/" in link):
 			#site is kisscartoon
-			discovered_url = kissencCartoon(temp_tree.xpath(dl_url_x_path)[0])
+			discovered_url = kissencCartoon(temp_tree.xpath(dl_url_x_path)[0], ses)
 		elif("/Drama/" in link):
 			#site is kissasian
 			discovered_url = kissencAsian(temp_tree.xpath(dl_url_x_path)[0], ses)
