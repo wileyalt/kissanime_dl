@@ -213,7 +213,7 @@ def decodeFunky(text):
 def printError():
 	printClr("The first argument is the url or update", Color.BOLD)
 	print("    'update' can only be given if kissanime_dl has been run in that directory before")
-	print("    The url can be from kissanime.to, kisscartoon.me, and kissjapan.com")
+	print("    The url can be from kissanime.to, kisscartoon.me, and kissasian.com")
 	printClr("The second argument is the path to download to", Color.BOLD)
 	printClr("An optional argument is --verbose", Color.BOLD)
 	printClr("An optional argument is --simulate.", Color.BOLD)
