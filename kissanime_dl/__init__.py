@@ -15,7 +15,7 @@ except ImportError:
 
 import sys
 import platform
-import subprocess
+import pip
 import os.path
 import string
 try:
@@ -97,11 +97,7 @@ def printClr(string, *args):
 
 def autoUpdate():
 	printClr("Checking for updates", Color.BOLD)
-	try:
-		with open(os.devnull, 'wb') as devnull:
-			subprocess.check_call(['python', '-m', 'pip', 'install', '-U', 'kissanime_dl'], stdout=devnull, stderr=subprocess.STDOUT)
-	except Exception as e:
-		#ignore it
+	pip.main(['install', '-U', '--no-cache-dir', '--no-deps', 'kissanime_dl'])
 
 NAME = 0
 DOWNLOAD_URL = 1
