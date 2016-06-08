@@ -71,15 +71,12 @@ setup(name='kissanime_dl',
 	author='Wiley Y.',
 	author_email="wileythrowaway001@gmail.com",
 	license='MIT',
-	packages=[
-    'kissanime_dl',
-    'kissanime_dl.autoupdate'
-    ],
+	packages=['kissanime_dl'],
 	install_requires=[
 	'requests==2.9.1',
 	'lxml>=3.5.0',
 	'js2py==0.35',
-    'pycryptodome==3.4',
+    'pycryptodome==3.4'
 	],
 	zip_safe=False,
 	entry_points = {

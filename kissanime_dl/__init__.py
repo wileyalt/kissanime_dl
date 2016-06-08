@@ -15,6 +15,7 @@ except ImportError:
 
 import sys
 import platform
+import subprocess
 import os.path
 import string
 try:
@@ -62,12 +63,7 @@ try:
 	from validhead import valid_begin, valid_end
 except ImportError:
 	from .validhead import valid_begin, valid_end
-
-try:
-	import autoupdate
-except ImportError:
-	import kissanime_dl.autoupdate
-
+	
 #GOTTA GET THAT VERSION
 #Get python version
 PYTHON_VER = sys.version_info[0]
@@ -101,8 +97,8 @@ def printClr(string, *args):
 
 def autoUpdate():
 	printClr("Checking for updates", Color.BOLD)
-	auto = autoupdate.updater.Updater()
-	auto.install("kissanime_dl")
+	with open(os.devnull, 'wb') as devnull:
+		subprocess.check_call(['python', '-m', 'pip', 'install', '-U', '--no-deps', 'kissanime_dl'], stdout=devnull, stderr=subprocess.STDOUT)
 
 NAME = 0
 DOWNLOAD_URL = 1
