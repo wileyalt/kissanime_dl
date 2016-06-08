@@ -25,6 +25,10 @@ js2py
 
 pycryptodome
 
+Already bundled with:
+
+autoupdate: https://github.com/AraHaan/Autoupdate
+
 #Installation
 ##*nix or OSX:
 
