@@ -63,7 +63,10 @@ try:
 except ImportError:
 	from .validhead import valid_begin, valid_end
 
-import autoupdate 
+try:
+	import autoupdate
+except ImportError:
+	import kissanime_dl.autoupdate
 
 #GOTTA GET THAT VERSION
 #Get python version
