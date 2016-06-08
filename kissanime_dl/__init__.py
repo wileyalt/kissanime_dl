@@ -679,7 +679,7 @@ def main():
 		if(len(lxml_parse.xpath(SEL_SER_OPT) ) == 0):
 			return False;
 
-		find_str = r"""<iframe(.*|\n)?src=\"https?:\/\/openload.co(.*?)\""""
+		find_str = r"""<iframe(?:.*|\n)?src=\"https?:\/\/openload.co(.*?)\""""
 
 		try:
 			raw_data = re.search(find_str, html_str).group(1)
@@ -694,7 +694,7 @@ def main():
 			printClr("Pattern: " + find_str, Color.RED, Color.BOLD)
 			return False;
 
-		raw_data = "http://openload.co"
+		raw_data = "http://openload.co" + raw_data
 		raw_data = raw_data.replace("embed", "f")
 
 		mu.acquire()
@@ -705,7 +705,7 @@ def main():
 			aaencoded = re.search(">ﾟωﾟﾉ= (.*?) \('_'\);", temp_r.content).group(1)
 		except AttributeError as e:
 			printClr("Regex Failure", Color.RED, Color.BOLD)
-			printClr("Could not find '>ﾟωﾟﾉ= (.*?) \('_'\);' in " + temp_r.content, Color.RED, Color.BOLD)
+			printClr("Could not find '>ﾟωﾟﾉ= (.*?) \('_'\);' in " + raw_data, Color.RED, Color.BOLD)
 			return False;
 		except TypeError:
 			aaencoded = re.search(">ﾟωﾟﾉ= (.*?) \('_'\);", temp_r.text).group(1)
