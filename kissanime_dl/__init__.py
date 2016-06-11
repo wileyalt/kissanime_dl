@@ -2,7 +2,6 @@
 
 #By WILEY YU
 
-DEBUG = 0
 url = ''
 JSON_HIS_MASTER_LINK_KEY = "master_link"
 JSON_HIS_VID_LINKS_KEY = "vid_links"
@@ -416,7 +415,7 @@ def main():
 		url = magiclink[JSON_HIS_MASTER_LINK_KEY]
 		if(verbose):
 			print("Found url from history: " + url)
-	
+
 		if(url != magiclink[JSON_HIS_MASTER_LINK_KEY] ):
 			#check to make sure that what is being passed in is in a new directory or the same url
 			printClr("The url passed in does not match the url(" + magiclink[JSON_HIS_MASTER_LINK_KEY] + ")present in " + LINK_HISTORY_FILE_NAME, Color.BOLD, Color.RED)
@@ -939,6 +938,3 @@ def main():
 
 	printClr("Downloaded " + str(len(dl_urls) ) + " files at " + dl_path, Color.BOLD, Color.GREEN)
 	printClr("Elapsed time: " + getElapsedTime(start_time), Color.BOLD)
-
-#debugging
-main()
