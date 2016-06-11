@@ -18,6 +18,7 @@ import platform
 import pip
 import os.path
 import string
+from time import sleep
 try:
 	#python2
 	from Queue import Queue
@@ -189,20 +190,8 @@ def findBetween(string, start, end):
 	return string[string.find(start) + len(start) : string.rfind(end)]
 
 def convJStoPy(string):
-
 	string = cVunicode(string)
-	ALLOWED_CHAR = set(cVunicode("![]+()") )
-
-	if(not (set(string) <= ALLOWED_CHAR) ):
-		raise RuntimeError("Converting the CloudFlare JS has changed!")
-
-	conv = string.replace("!![]", "1")
-	conv = conv.replace("!+[]", "1")
-	conv = conv.replace("[]", "0")
-	conv = conv.replace("+", "", 0)
-	conv = conv.replace("((", "int(str(")
-	conv = conv.replace(")+(", ")+str(")
-	return conv
+	return js2py.eval_js(string)
 
 def decodeAA(text):
 	return openload_decode(text)
@@ -472,19 +461,6 @@ def main():
 	script = findBetween(r.text, "<script", "</script>")
 	strip_script = [stri.strip() for stri in script.splitlines()]
 
-	#We need to decode the javascript
-	#f is the last known variable before the messy one
-	#starts ln 9
-	var_beg = "f, "
-	var_end = "="
-	json_name_beg = "\""
-	json_name_end = "\""
-	json_data_beg = ":"
-	json_data_end = "}"
-
-	unkwn_var_name = findBetween(strip_script[8], var_beg, var_end) + "." + findBetween(strip_script[8], json_name_beg, json_name_end)
-	val_unkwn_var = eval(convJStoPy(findBetween(strip_script[8], json_data_beg, json_data_end) ) )
-
 	js_var_t = "<a href='/'>x</a>"
 	#root("/") url
 	js_var_t_href = '{uri.scheme}://{uri.netloc}/'.format(uri=urlparse(url))
@@ -506,20 +482,31 @@ def main():
 	val_jschl_vc = tree.xpath("//input[contains(@name, 'jschl_vc')]")[0].value
 	val_pass = tree.xpath("//input[contains(@name, 'pass')]")[0].value
 
-	#splits code into bite-size array
-	#operations are at line 16
-	var_complex_op = [stri+";" for stri in strip_script[15].split(";")]
+	string_to_eval_re_search = "[^ ]+$"
+	try:
+		string_to_eval = "var " + re.search(string_to_eval_re_search, strip_script[8]).group(0)
+	except AttributeError as e:
+		printClr("Regex Failure", Color.RED, Color.BOLD)
+		printClr("Could not find " + string_to_eval_re_search + " in " + strip_script[8], Color.RED, Color.BOLD)
+		raise
+	except:
+		printClr("Unknown Regex Error", Color.RED, Color.BOLD)
+		printClr("Pattern: " + string_to_eval_re_search, Color.RED, Color.BOLD)
+		raise
 
-	for string in var_complex_op[:-2]:
-		if(unkwn_var_name not in string):
-			continue
-		else:
-			eval_phrase = "val_unkwn_var" + findBetween(string, unkwn_var_name, "=") + "(" + convJStoPy(findBetween(string, '=', ';') ) + ")"
-			#print(eval_phrase)
-			#print("genned val: " + str(eval("(" + convJStoPy(findBetween(string, '=', ';') ) + ")") ) )
-			val_unkwn_var = eval(eval_phrase)
+	another_regex_str = "^(.*)(?:a.value)"
+	try:
+		string_to_eval = string_to_eval + re.search(another_regex_str, strip_script[15]).group(1)[1:]
+	except AttributeError as e:
+		printClr("Regex Failure", Color.RED, Color.BOLD)
+		printClr("Could not find " + another_regex_str + " in " + strip_script[15], Color.RED, Color.BOLD)
+		raise
+	except:
+		printClr("Unknown Regex Error", Color.RED, Color.BOLD)
+		printClr("Pattern: " + another_regex_str, Color.RED, Color.BOLD)
+		raise
 
-	val_unkwn_var = val_unkwn_var + len(js_var_t)
+	val_unkwn_var = convJStoPy(string_to_eval) + len(js_var_t)
 
 	payload = {
 		'jschl_vc' : val_jschl_vc,
@@ -533,7 +520,10 @@ def main():
 	time.sleep(4)
 
 	URL_SEND_PAYLOAD_TO = vurl_result[0] + "/cdn-cgi/l/chk_jschl"
-	sess.get(URL_SEND_PAYLOAD_TO, params=payload, timeout=30.0)
+	form_get = sess.get(URL_SEND_PAYLOAD_TO, params=payload, timeout=30.0)
+
+	if(form_get.url != js_var_t_href):
+		raise RuntimeError("Converting the CloudFlare JS has changed!")
 
 	r = sess.get(url, timeout=30.0)
 
@@ -661,8 +651,10 @@ def main():
 	global dl_url_x_path
 	dl_url_x_path = DOWNLOAD_URL_X_PATH
 
-	aadecode_mu = threading.Lock()
-	def getOpenLoadUrls(queuee, link, ses):
+	def getOpenLoadUrls(queuee, link, ses, sleeptime):
+
+		sleep(sleeptime)
+
 		payload = {"s" : "openload"}
 
 		mu.acquire()
@@ -678,7 +670,7 @@ def main():
 		if(len(lxml_parse.xpath(SEL_SER_OPT) ) == 0):
 			return False;
 
-		find_str = r"""<iframe(?:.*|\n)?src=\"https?:\/\/openload.co(.*?)\""""
+		find_str = r"""src=\"https?:\/\/openload.co(.*?)\""""
 
 		try:
 			raw_data = re.search(find_str, html_str).group(1)
@@ -716,10 +708,7 @@ def main():
 		#need to add beginning and ending face to complete the encoded string
 		aaencoded = "ﾟωﾟﾉ= " + aaencoded + " ('_');"
 
-		#I don't know if js2py is multithread safe
-		aadecode_mu.acquire()
 		decodedaa = decodeAA(aaencoded)
-		aadecode_mu.release()
 
 		try:
 			decodedaa = re.search("function\(\)(.*)\(\)", decodedaa).group(1)
@@ -758,21 +747,40 @@ def main():
 		temp_head = requests.head(deobfuscatedaa)
 		mu.release()
 
+		#openload now redirects
+		redirect = temp_head.headers['location']
+
+		"""
+		for old version of code
+
+		mu.acquire()
+		temp_head = requests.head(deobfuscatedaa)
+		mu.release()
+
+
 		d = temp_head.headers['content-disposition']
 		file_name = re.findall("filename=(.+)", d)[0]
 		file_name = file_name.replace("\"", '')
 		file_name = file_name.replace(" ", '')
 		file_name = file_name.replace(".mp4", '')
+		"""
+		try:
+			file_name = re.search("([^/]*)\?", redirect).group(1)
+			file_name = file_name.replace(".mp4", '')
+		except Exception:
+			file_name = re.search("[^/]+$", link)
 
-		queuee.put([file_name, deobfuscatedaa, link])
+		queuee.put([file_name, redirect, link])
 
 		if(verbose):
 			print_mu.acquire()
-			print("Found download link: " + deobfuscatedaa)
+			print("Found download link: " + redirect)
 			print("Found file name: " + file_name)
 			print_mu.release()
 
-	def getBlogspotUrls(queuee, link, ses):
+	def getBlogspotUrls(queuee, link, ses, sleeptime):
+		sleep(sleeptime)
+
 		#lets make a copy
 		global dl_url_x_path
 
@@ -843,16 +851,17 @@ def main():
 
 	def getDLUrls(queuee, links, ses):
 		try:
+			count = 0
 			for ur in links:
-
 				if(openload == False):
-					if(getBlogspotUrls(queuee, ur, ses) == False):
-						if(getOpenLoadUrls(queuee, ur, ses) == False):
+					if(getBlogspotUrls(queuee, ur, ses, count * .05) == False):
+						if(getOpenLoadUrls(queuee, ur, ses, count * .05) == False):
 							printClr("Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
 				elif(openload == True):
-					if(getOpenLoadUrls(queuee, ur, ses) == False):
-						if(getBlogspotUrls(queuee, ur, ses) == False):
+					if(getOpenLoadUrls(queuee, ur, ses, count * .05) == False):
+						if(getBlogspotUrls(queuee, ur, ses, count * .05) == False):
 							printClr("Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
+				count += 1
 		except:
 			return
 
@@ -930,3 +939,6 @@ def main():
 
 	printClr("Downloaded " + str(len(dl_urls) ) + " files at " + dl_path, Color.BOLD, Color.GREEN)
 	printClr("Elapsed time: " + getElapsedTime(start_time), Color.BOLD)
+
+#debugging
+main()
