@@ -38,7 +38,7 @@ comb = {}
 comb['Asian'] = {}
 comb['Asian']['sha'] = ""
 comb['Asian']['topost'] = 'http://kissasian.com/External/RSK'
-comb['Asian']['payload'] = {"krsk": "gcGdcrFk"}
+comb['Asian']['payload'] = {"krsk": "krsk"}
 comb['Asian']['f'] = binascii.unhexlify(asian_c)
 #END ASIAN
 
