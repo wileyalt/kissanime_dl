@@ -851,14 +851,15 @@ def main():
 	def getDLUrls(queuee, links, ses):
 		try:
 			count = 0
+            sleepy_time = .1;
 			for ur in links:
 				if(openload == False):
-					if(getBlogspotUrls(queuee, ur, ses, count * .05) == False):
-						if(getOpenLoadUrls(queuee, ur, ses, count * .05) == False):
+					if(getBlogspotUrls(queuee, ur, ses, count * sleepy_time) == False):
+						if(getOpenLoadUrls(queuee, ur, ses, count * sleepy_time) == False):
 							printClr("Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
 				elif(openload == True):
-					if(getOpenLoadUrls(queuee, ur, ses, count * .05) == False):
-						if(getBlogspotUrls(queuee, ur, ses, count * .05) == False):
+					if(getOpenLoadUrls(queuee, ur, ses, count * sleepy_time) == False):
+						if(getBlogspotUrls(queuee, ur, ses, count * sleepy_time) == False):
 							printClr("Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
 				count += 1
 		except:
