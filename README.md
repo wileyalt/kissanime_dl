@@ -135,6 +135,10 @@ Optional arguments:
 —noupdate
 	Prevents kissanime_dl from autoupdating
 
+--delay=SEC
+    Adds a delay between get requests to the master page
+    Value in seconds
+
 --help: Prints help
 ```
 
