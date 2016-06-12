@@ -652,7 +652,7 @@ def main():
 
 	def getOpenLoadUrls(queuee, link, ses, sleeptime):
 
-		sleep(sleeptime)
+		time.sleep(sleeptime)
 
 		payload = {"s" : "openload"}
 
@@ -778,7 +778,7 @@ def main():
 			print_mu.release()
 
 	def getBlogspotUrls(queuee, link, ses, sleeptime):
-		sleep(sleeptime)
+		time.sleep(sleeptime)
 
 		#lets make a copy
 		global dl_url_x_path
