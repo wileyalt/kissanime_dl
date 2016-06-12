@@ -229,6 +229,8 @@ def printError():
 	print("    Forces to download from openload and attempts blogspot if openload is not supported on the page.")
 	printClr("An optional argument is --noupdate", Color.BOLD)
 	print("    Prevents the program from checking for and updating to the newest version of kissanime_dl")
+	printClr("An optional argument is --delay", Color.BOLD)
+	print("    Sets the delay in seconds between requests to the url given in the first argument.")
 	printClr("An optional argument is --help", Color.BOLD)
 
 def getElapsedTime(s_time):
@@ -269,6 +271,8 @@ def main():
 
 	MAX_THREADS = 5
 	quality_txt = ""
+
+	sleepy_time = 0.1
 
 	#optional args
 	if(len(sys.argv) > 3):
@@ -363,6 +367,10 @@ def main():
 
 			elif(case_arg == "--noupdate"):
 				auto_update = False
+
+			elif(case_arg == "--delay"):
+				sleepy_time = float(psd_arg.split('=')[1])
+
 			else:
 				printClr("Unknown argument: " + sys.argv[i], Color.BOLD, Color.RED)
 				printError()
@@ -848,18 +856,17 @@ def main():
 			print_mu.release()
 
 
-	def getDLUrls(queuee, links, ses):
+	def getDLUrls(queuee, links, ses, sleepy_time, sleepy_increment):
 		try:
 			count = 0
-            sleepy_time = .1;
 			for ur in links:
 				if(openload == False):
-					if(getBlogspotUrls(queuee, ur, ses, count * sleepy_time) == False):
-						if(getOpenLoadUrls(queuee, ur, ses, count * sleepy_time) == False):
+					if(getBlogspotUrls(queuee, ur, ses, sleepy_increment * count + sleepy_time) == False):
+						if(getOpenLoadUrls(queuee, ur, ses, sleepy_increment * count + sleepy_time) == False):
 							printClr("Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
 				elif(openload == True):
-					if(getOpenLoadUrls(queuee, ur, ses, count * sleepy_time) == False):
-						if(getBlogspotUrls(queuee, ur, ses, count * sleepy_time) == False):
+					if(getOpenLoadUrls(queuee, ur, ses, sleepy_increment * count + sleepy_time) == False):
+						if(getBlogspotUrls(queuee, ur, ses, sleepy_increment * count + sleepy_time) == False):
 							printClr("Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
 				count += 1
 		except:
@@ -880,7 +887,7 @@ def main():
 			print((i * CHUNK_SIZE))
 			print((i * CHUNK_SIZE + CHUNK_SIZE))
 			print(loc_data)
-		thrs.append(threading.Thread(target = getDLUrls, args = (dl_urls, loc_data, sess) ) )
+		thrs.append(threading.Thread(target = getDLUrls, args = (dl_urls, loc_data, sess, sleepy_time * i + sleepy_time, sleepy_time * MAX_THREADS) ) )
 		thrs[i].daemon = True
 		thrs[i].start()
 
