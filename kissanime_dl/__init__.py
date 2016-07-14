@@ -75,6 +75,7 @@ class Color:
 	BOLD = '1'
 	RED = '31'
 	GREEN = '32'
+	YELLOW = '33'
 	END_BEG = 'm'
 	END = '\033[0m'
 
@@ -98,6 +99,10 @@ def printClr(string, *args):
 def autoUpdate():
 	printClr("Checking for updates", Color.BOLD)
 	pip.main(['install', '-U', '--no-cache-dir', '--no-deps', 'kissanime_dl'])
+
+def printCapchaWarning():
+        printClr("Warning: KissCartoon and KissAsian tend to ask for capcha after 5 video intervals.", Color.BOLD, Color.YELLOW)
+        
 
 NAME = 0
 DOWNLOAD_URL = 1
@@ -388,6 +393,9 @@ def main():
 	#check for updates
 	if auto_update:
 		autoUpdate()
+
+	#print that capcha warning
+	printCapchaWarning()
 
 
 	#gets first arg
