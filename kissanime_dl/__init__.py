@@ -17,7 +17,6 @@ import platform
 import pip
 import os.path
 import string
-from time import sleep
 try:
 	#python2
 	from Queue import Queue
@@ -31,6 +30,11 @@ import time
 import shutil
 import json
 
+from datetime import timedelta
+
+import requests
+from lxml import html
+
 try:
 	#python2
 	from urlparse import urlparse
@@ -38,11 +42,10 @@ except ImportError:
 	#python3
 	from urllib.parse import urlparse
 
-from datetime import timedelta
-
-import requests
-from lxml import html
-import js2py
+try:
+        from session_make import makeSession
+except ImportError:
+        from .session_make import makeSession
 
 try:
 	from openloaddecode import openload_decode
@@ -64,37 +67,19 @@ try:
 except ImportError:
 	from .validhead import valid_begin, valid_end
 
+try:
+        from color_print import Color, printClr
+except ImportError:
+        from .color_print import Color, printClr
+
+try:
+        from jsexec import convJStoPy
+except ImportError:
+        from .jsexec import convJStoPy
+        
 #GOTTA GET THAT VERSION
 #Get python version
 PYTHON_VER = sys.version_info[0]
-
-#unicode colors!
-class Color:
-	BEG = '\033['
-	SEP = ';'
-	BOLD = '1'
-	RED = '31'
-	GREEN = '32'
-	YELLOW = '33'
-	END_BEG = 'm'
-	END = '\033[0m'
-
-def printClr(string, *args):
-	#we have to work backwards
-	string = Color.END_BEG + string
-
-	fst = False
-	for arg in args:
-		if(fst == False):
-			string = arg + string
-			fst = True
-			continue
-
-		string = Color.SEP + string
-		string = arg + string
-
-	string = Color.BEG + string
-	print(string + Color.END)
 
 def autoUpdate():
 	printClr("Checking for updates", Color.BOLD)
@@ -103,7 +88,6 @@ def autoUpdate():
 def printCapchaWarning():
         printClr("Warning: KissCartoon and KissAsian tend to ask for capcha after 5 video intervals.", Color.BOLD, Color.YELLOW)
         
-
 NAME = 0
 DOWNLOAD_URL = 1
 PARENT_URL = 2
@@ -189,13 +173,6 @@ def downloadFile(url, dl_path, PATH_TO_HISTORY, masterurl):
 	console_mu.acquire()
 	print("Finished downloading " + dl_name)
 	console_mu.release()
-
-def findBetween(string, start, end):
-	return string[string.find(start) + len(start) : string.rfind(end)]
-
-def convJStoPy(string):
-	string = cVunicode(string)
-	return js2py.eval_js(string)
 
 def decodeAA(text):
 	return openload_decode(text)
@@ -457,89 +434,8 @@ def main():
 			printClr("Status Code: " + str(thehead.status_code), Color.BOLD, Color.RED)
 			return
 
-
-	#begin session
-	sess = requests.Session()
-	sess.keep_alive = True
-	sess.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"
-
-	r = sess.get(url, timeout=30.0)
-	if verbose:
-		print("Started session at " + url)
-
-	if(r.status_code != requests.codes.ok and r.status_code != 503):
-		#Bad connection to site
-		printClr("Failed to get a good status code with site", Color.BOLD, Color.RED)
-		return;
-
-	tree = html.fromstring(r.content)
-	script = findBetween(r.text, "<script", "</script>")
-	strip_script = [stri.strip() for stri in script.splitlines()]
-
-	js_var_t = "<a href='/'>x</a>"
-	#root("/") url
-	js_var_t_href = '{uri.scheme}://{uri.netloc}/'.format(uri=urlparse(url))
-
-	try:
-		js_var_r = re.search(r"https?:\/\/", js_var_t_href).group(0)
-	except AttributeError as e:
-		printClr("Regex Failure", Color.RED, Color.BOLD)
-		printClr("Could not find 'https?:\/\/' in " + js_var_t_href, Color.RED, Color.BOLD)
-		raise
-	except:
-		printClr("Unknown Regex Error", Color.RED, Color.BOLD)
-		printClr("Pattern: https?:\/\/", Color.RED, Color.BOLD)
-		raise
-
-	js_var_t = js_var_t_href[len(js_var_r) :]
-	js_var_t = js_var_t[0 : len(js_var_t) - 1]
-
-	val_jschl_vc = tree.xpath("//input[contains(@name, 'jschl_vc')]")[0].value
-	val_pass = tree.xpath("//input[contains(@name, 'pass')]")[0].value
-
-	string_to_eval_re_search = "[^ ]+$"
-	try:
-		string_to_eval = "var " + re.search(string_to_eval_re_search, strip_script[8]).group(0)
-	except AttributeError as e:
-		printClr("Regex Failure", Color.RED, Color.BOLD)
-		printClr("Could not find " + string_to_eval_re_search + " in " + strip_script[8], Color.RED, Color.BOLD)
-		raise
-	except:
-		printClr("Unknown Regex Error", Color.RED, Color.BOLD)
-		printClr("Pattern: " + string_to_eval_re_search, Color.RED, Color.BOLD)
-		raise
-
-	another_regex_str = "^(.*)(?:a.value)"
-	try:
-		string_to_eval = string_to_eval + re.search(another_regex_str, strip_script[15]).group(1)[1:]
-	except AttributeError as e:
-		printClr("Regex Failure", Color.RED, Color.BOLD)
-		printClr("Could not find " + another_regex_str + " in " + strip_script[15], Color.RED, Color.BOLD)
-		raise
-	except:
-		printClr("Unknown Regex Error", Color.RED, Color.BOLD)
-		printClr("Pattern: " + another_regex_str, Color.RED, Color.BOLD)
-		raise
-
-	val_unkwn_var = convJStoPy(string_to_eval) + len(js_var_t)
-
-	payload = {
-		'jschl_vc' : val_jschl_vc,
-		'pass' : val_pass,
-		'jschl_answer' : val_unkwn_var
-	}
-
-	print("Waiting for authentication...")
-	print("Should take about 4 seconds")
-	#wait for 4 sec
-	time.sleep(4)
-
-	URL_SEND_PAYLOAD_TO = vurl_result[0] + "/cdn-cgi/l/chk_jschl"
-	form_get = sess.get(URL_SEND_PAYLOAD_TO, params=payload, timeout=30.0)
-
-	if(form_get.url != js_var_t_href):
-		raise RuntimeError("Converting the CloudFlare JS has changed!")
-
+	#new session creater
+	sess = makeSession(url, vurl_result, verbose)
 	r = sess.get(url, timeout=30.0)
 
 	URL_ERROR_URL = vurl_result[-1] + "/Error"
@@ -560,6 +456,8 @@ def main():
 
 	LINK_TABLE_X_PATH = "//table[@class='listing']/tr/td/a"
 	vid_lxml_ele = tree.xpath(LINK_TABLE_X_PATH)
+
+	js_var_t_href = '{uri.scheme}://{uri.netloc}/'.format(uri=urlparse(url))
 
 	vid_links = []
 	for i in range(len(vid_lxml_ele) ):
