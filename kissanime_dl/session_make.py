@@ -7,10 +7,10 @@ import time
 
 try:
 	#python2
-	from urlparse import urlparse, urlsplit
+	from urlparse import urlparse
 except ImportError:
 	#python3
-	from urllib.parse import urlparse, urlsplit
+	from urllib.parse import urlparse
 
 try:
         from color_print import Color, printClr
@@ -105,8 +105,8 @@ def makeSession(url, vurl_result, verbose):
 
     URL_SEND_PAYLOAD_TO = vurl_result[0] + "/cdn-cgi/l/chk_jschl"
     form_get = sess.get(URL_SEND_PAYLOAD_TO, params=payload, timeout=30.0)
-
-    if(urlsplit(form_get.url).netloc != urlsplit(js_var_t_href).netloc):
+    
+    if(form_get.status_code != requests.codes.ok):
             raise RuntimeError("Converting the CloudFlare JS has changed!")
 
     return sess
