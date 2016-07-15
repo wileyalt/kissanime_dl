@@ -130,6 +130,11 @@ def cVunicode(any):
 def downloadFile(url, dl_path, PATH_TO_HISTORY, masterurl):
 	dl_name = cVunicode(url[NAME])
 	dl_path = cVunicode(dl_path)
+
+	if(type(dl_name) != type(str() ) ):
+                #incase any strange happenings happen with extracting the filename
+                dl_name = url[DOWNLOAD_URL]
+	
 	if(len(dl_name) > 252):
 		dl_name = dl_name[:252]
 
@@ -211,7 +216,7 @@ def printError():
 	print("    Forces to download from openload and attempts blogspot if openload is not supported on the page.")
 	printClr("An optional argument is --noupdate", Color.BOLD)
 	print("    Prevents the program from checking for and updating to the newest version of kissanime_dl")
-	printClr("An optional argument is --delay", Color.BOLD)
+	printClr("An optional argument is --delay=SEC", Color.BOLD)
 	print("    Sets the delay in seconds between requests to the url given in the first argument.")
 	printClr("An optional argument is --help", Color.BOLD)
 
