@@ -189,7 +189,7 @@ def printError():
 	printClr("The first argument is the url or update", Color.BOLD)
 	print("    'update' can only be given if kissanime_dl has been run in that directory before")
 	print("    The url can be from kissanime.to, kisscartoon.me, and kissasian.com")
-	printClr("The second argument is the path to download to", Color.BOLD)
+	printClr("The second argument is the path to download to or '-' for name from url", Color.BOLD)
 	printClr("An optional argument is --verbose", Color.BOLD)
 	printClr("An optional argument is --simulate.", Color.BOLD)
 	print("    This simulates finding the links, but doesn't download")
@@ -363,11 +363,7 @@ def main():
 				printError()
 				return
 
-	if(len(sys.argv) == 1):
-		printError()
-		return
-
-	if(len(sys.argv) < 3):
+	if(len(sys.argv) < 3 ):
 		printClr("Error: kissanime_dl takes in 2 args, the url, and the path to download to", Color.BOLD, Color.RED)
 		printError()
 		return
@@ -383,14 +379,21 @@ def main():
 	#gets first arg
 	url = sys.argv[1]
 
-	dl_path = os.path.abspath(sys.argv[2])
+	if(sys.argv[2] == '-'):
+		splits = url.split('/')
+		dl_dir = splits[-1] if splits[-1] else splits[-2]
+		dl_path = os.path.abspath(dl_dir)
+	else:
+		dl_path = os.path.abspath(sys.argv[2])
 
 	PATH_TO_HISTORY = dl_path + "/" + LINK_HISTORY_FILE_NAME
 
-	if(os.path.isdir(dl_path) == False):
-		printClr(dl_path + " is not a valid directory", Color.BOLD, Color.RED)
+	if(os.path.isfile(dl_path)):
+		printClr("File with same name exists: " + dl_path, Color.BOLD, Color.RED)
 		printError()
 		return
+	elif(not os.path.isdir(dl_path)):
+		os.mkdir(dl_path)
 
 	if(url == "update"):
 		#grab the urls
