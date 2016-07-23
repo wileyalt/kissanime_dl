@@ -43,6 +43,13 @@ except ImportError:
 	from urllib.parse import urlparse
 
 try:
+	#python2
+	from urllib import unquote
+except ImportError:
+	#python3
+	from urllib.parse import unquote
+
+try:
         from session_make import makeSession
 except ImportError:
         from .session_make import makeSession
@@ -671,25 +678,11 @@ def main():
 		#openload now redirects
 		redirect = temp_head.headers['location']
 
-		"""
-		for old version of code
+		print(unquote(redirect) )
 
-		mu.acquire()
-		temp_head = requests.head(deobfuscatedaa)
-		mu.release()
+		file_name = unquote(redirect).rpartition('/')[-1]
 
-
-		d = temp_head.headers['content-disposition']
-		file_name = re.findall("filename=(.+)", d)[0]
-		file_name = file_name.replace("\"", '')
-		file_name = file_name.replace(" ", '')
-		file_name = file_name.replace(".mp4", '')
-		"""
-		try:
-			file_name = re.search("([^/]*)\?", redirect).group(1)
-			file_name = file_name.replace(".mp4", '')
-		except Exception:
-			file_name = re.search("[^/]+$", link)
+		print(file_name)
 
 		queuee.put([file_name, redirect, link])
 
@@ -771,9 +764,9 @@ def main():
 
 
 	def getDLUrls(queuee, links, ses, sleepy_time, sleepy_increment):
-		try:
-			count = 0
-			for ur in links:
+		count = 0
+		for ur in links:
+			try:
 				if(openload == False):
 					if(getBlogspotUrls(queuee, ur, ses, sleepy_increment * count + sleepy_time) == False):
 						if(getOpenLoadUrls(queuee, ur, ses, sleepy_increment * count + sleepy_time) == False):
@@ -782,9 +775,9 @@ def main():
 					if(getOpenLoadUrls(queuee, ur, ses, sleepy_increment * count + sleepy_time) == False):
 						if(getBlogspotUrls(queuee, ur, ses, sleepy_increment * count + sleepy_time) == False):
 							printClr("Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
-				count += 1
-		except:
-			return
+			except Exception as e:
+				printClr("Error thrown while attempting to find download url: " + repr(e), Color.BOLD, Color.RED)
+			count += 1
 
 	dl_urls = Queue()
 	thrs = []
