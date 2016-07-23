@@ -787,7 +787,7 @@ def main():
 		lst_to_send = [ vid_links[i::MAX_THREADS] for i in xrange(MAX_THREADS) ]
 	except NameError:
 		#python3
-		lst_to_send = [ lst[i::MAX_THREADS] for i in range(MAX_THREADS) ]
+		lst_to_send = [ vid_links[i::MAX_THREADS] for i in range(MAX_THREADS) ]
 
 	for i in range(MAX_THREADS):
 		if(verbose):
