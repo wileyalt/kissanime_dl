@@ -786,20 +786,22 @@ def main():
 		except:
 			return
 
-	CHUNK_SIZE = int(round(len(vid_links) / float(MAX_THREADS) ) )
 	dl_urls = Queue()
 	thrs = []
+
+	try:
+		#python2
+		lst_to_send = [ vid_links[i::MAX_THREADS] for i in xrange(MAX_THREADS) ]
+	except NameError:
+		#python3
+		lst_to_send = [ lst[i::MAX_THREADS] for i in range(MAX_THREADS) ]
+
 	for i in range(MAX_THREADS):
 		if(verbose):
 			print("Creating Thread " + str(i) )
-		loc_data = []
-		if(i == MAX_THREADS - 1):
-			loc_data = vid_links[(i * CHUNK_SIZE) : ]
-		else:
-			loc_data = vid_links[(i * CHUNK_SIZE) : (i * CHUNK_SIZE + CHUNK_SIZE)]
+		loc_data = lst_to_send[i]
 		if(verbose):
-			print((i * CHUNK_SIZE))
-			print((i * CHUNK_SIZE + CHUNK_SIZE))
+			print("Data Size: " + str(len(loc_data) ) )
 			print(loc_data)
 		thrs.append(threading.Thread(target = getDLUrls, args = (dl_urls, loc_data, sess, sleepy_time * i + sleepy_time, sleepy_time * MAX_THREADS) ) )
 		thrs[i].daemon = True
@@ -810,6 +812,7 @@ def main():
 		time.sleep(0.1)
 
 	del thrs
+	del lst_to_send
 
 	#lets clean up
 	del tree
