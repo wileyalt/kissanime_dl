@@ -1,5 +1,5 @@
-#This is the file that stores all the valid beginnings and middles for sites that kissanime_dl can connect to.
-#In separate file for easy finding in future should any more sites be included
+# This is the file that stores all the valid beginnings and middles for sites that kissanime_dl can connect to.
+# In separate file for easy finding in future should any more sites be included
 
 valid_begin = {
     "kissanime.to",
@@ -12,4 +12,3 @@ valid_end = {
     "/Cartoon/",
     "/Drama/"
 }
-

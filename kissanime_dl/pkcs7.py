@@ -1,4 +1,4 @@
-#from https://github.com/janglin/crypto-pkcs7-example/blob/master/pkcs7.py
+# from https://github.com/janglin/crypto-pkcs7-example/blob/master/pkcs7.py
 
 import binascii
 
@@ -6,6 +6,7 @@ try:
     import StringIO
 except ImportError:
     from io import StringIO
+
 
 class PKCS7Encoder(object):
     '''
@@ -30,10 +31,11 @@ class PKCS7Encoder(object):
     padding method is well-defined if and only if k < 256;
     methods for larger k are an open issue for further study.
     '''
+
     def __init__(self, k=16):
         self.k = k
 
-    ## @param text The padded text for which the padding is to be removed.
+    # @param text The padded text for which the padding is to be removed.
     # @exception ValueError Raised when the input padding is missing or corrupt.
     def decode(self, text):
         '''
@@ -45,14 +47,14 @@ class PKCS7Encoder(object):
             val = int(binascii.hexlify(text[-1]), 16)
         except TypeError:
             val = text[-1]
-			
+
         if val > self.k:
             raise ValueError('Input is not padded or padding is corrupt')
 
         l = nl - val
         return text[:l]
 
-    ## @param text The text to encode.
+    # @param text The text to encode.
     def encode(self, text):
         '''
         Pad an input string according to PKCS#7

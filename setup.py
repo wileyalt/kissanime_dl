@@ -4,25 +4,31 @@ from setuptools.command.install_scripts import install_scripts
 from distutils.util import convert_path
 import os
 
-#-----------------------------------------------------------------------------
+# -----------------------------------------------------------------------------
 # Hack to overcome pip/setuptools problem on Win 10.  See:
 #   https://github.com/tomduck/pandoc-eqnos/issues/6
 #   https://github.com/pypa/pip/issues/2783
 # Note that cmdclass must be be hooked into setup().
 
 # Custom install command class for setup()
+
+
 class custom_install(install):
     """Ensures setuptools uses custom install_scripts."""
+
     def run(self):
         super().run()
 
 # Custom install_scripts command class for setup()
+
+
 class install_scripts_quoted_shebang(install_scripts):
     """Ensure there are quotes around shebang paths with spaces."""
+
     def write_script(self, script_name, contents, mode="t", *ignored):
         shebang = str(contents.splitlines()[0])
         if shebang.startswith('#!') and ' ' in shebang[2:].strip() \
-          and '"' not in shebang:
+                and '"' not in shebang:
             quoted_shebang = '#!"%s"' % shebang[2:].strip()
             contents = contents.replace(shebang, quoted_shebang)
         super().write_script(script_name, contents, mode, *ignored)
@@ -65,22 +71,22 @@ with open(ver_path) as ver_file:
     exec(ver_file.read(), main_ns)
 
 setup(name='kissanime_dl',
-	version=main_ns['__version__'],
-	description='Easy downloading .mp4s from kissanime.to',
-	url="https://github.com/wileyyugioh/kissanime_dl",
-	author='Wiley Y.',
-	author_email="wileythrowaway001@gmail.com",
-	license='MIT',
-	packages=['kissanime_dl'],
-	install_requires=[
-	'requests==2.10.0',
-	'lxml>=3.5.0',
-	'js2py==0.37',
-    'pycryptodome==3.4'
-	],
-	zip_safe=False,
-	entry_points = {
-		"console_scripts" : ['kissanime-dl = kissanime_dl.command_line:main']
-	},
-	cmdclass=cmdclass
-	)
+      version=main_ns['__version__'],
+      description='Easy downloading .mp4s from kissanime.to',
+      url="https://github.com/wileyyugioh/kissanime_dl",
+      author='Wiley Y.',
+      author_email="wileythrowaway001@gmail.com",
+      license='MIT',
+      packages=['kissanime_dl'],
+      install_requires=[
+          'requests==2.10.0',
+          'lxml>=3.5.0',
+          'js2py==0.37',
+          'pycryptodome==3.4'
+      ],
+      zip_safe=False,
+      entry_points={
+          "console_scripts": ['kissanime-dl = kissanime_dl.command_line:main']
+      },
+      cmdclass=cmdclass
+      )
