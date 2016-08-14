@@ -696,7 +696,7 @@ def main():
     else:
         # Run in new mode
 
-        num_thrs = 6
+        num_thrs = 5
         dl_pool = Queue()
         map(dl_pool.put, vid_links)
         thrs = []
