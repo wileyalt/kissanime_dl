@@ -678,9 +678,9 @@ def main():
         thrs = []
 
         def getSingle(link, ses):
-        	pure_link = getBlogspotUrls(link, ses, sleepy_time, quality_txt, verbose)
+            pure_link = getBlogspotUrls(link, ses, sleepy_time, quality_txt, verbose)
             if(pure_link is False):
-            	return False
+                return False
             return pure_link
 
         def getComplete(ses, download_pool):
