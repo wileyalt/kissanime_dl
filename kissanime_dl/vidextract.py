@@ -150,7 +150,6 @@ def getOpenLoadUrls(link, ses, sleeptime, verbose=False):
     return [file_name, redirect, link]
 
 def getBlogspotUrls(link, ses, sleeptime, quality_txt, verbose=False):
-    print('hi')
     if(quality_txt != ""):
         DOWNLOAD_URL_X_PATH = DOWNLOAD_URL_X_PATH + \
             "/option[normalize-space(text() ) = \'" + \
