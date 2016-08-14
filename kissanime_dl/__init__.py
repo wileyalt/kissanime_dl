@@ -697,8 +697,11 @@ def main():
         # Run in new mode
 
         num_thrs = 5
+        if(len(vid_links) < num_thrs):
+            num_thrs = len(vid_links)
         dl_pool = Queue()
-        map(dl_pool.put, vid_links)
+        for vid_url in vid_links:
+            dl_pool.put(vid_url)
         thrs = []
 
         def getSingle(link, ses):
