@@ -10,7 +10,7 @@ Downloads all mp4s from a kissanime, kisscartoon, or kissasian mastersite!
 
 Blogspot
 
-Openload.co
+~~Openload.co~~
 
 
 ##DOES NOT SUPPORT ONEDRIVE

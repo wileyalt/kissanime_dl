@@ -63,3 +63,18 @@ def jsdecode(raw_str):
             fin_data = fin_data + val.decode('utf8')
 
     return fin_data
+
+def jsdecode2(hiddenurl):
+    data_str = ''
+    for i in range(len(hiddenurl) - 1):
+        #charcode@
+        j = ord((hiddenurl[i]))
+        if(j >= 33 and j <= 126):
+            data_str = data_str + chr(33+((j+14)%94))
+        else:
+            data_str = data_str + chr(j)
+
+    return data_str
+
+
+

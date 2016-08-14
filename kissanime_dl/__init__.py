@@ -24,13 +24,6 @@ try:
 except ImportError:
     # python3
     from urllib.parse import urlparse
-try:
-    # python2
-    from urllib import unquote
-except ImportError:
-    # python3
-    from urllib.parse import unquote
-
 
 import requests
 from lxml import html
@@ -44,16 +37,6 @@ try:
     from session_make import makeSession
 except ImportError:
     from .session_make import makeSession
-
-try:
-    from openloaddecode import openload_decode
-except ImportError:
-    from .openloaddecode import openload_decode
-
-try:
-    from js_exc_decode import jsdecode
-except ImportError:
-    from .js_exc_decode import jsdecode
 
 try:
     from validhead import valid_begin, valid_end
@@ -186,15 +169,6 @@ def downloadFile(url, dl_path, PATH_TO_HISTORY, masterurl):
     print("Finished downloading " + dl_name)
     console_mu.release()
 
-
-def decodeAA(text):
-    return openload_decode(text)
-
-
-def decodeFunky(text):
-    return jsdecode(text)
-
-
 def printError():
     printClr("The first argument is the url or update", Color.BOLD)
     print("    'update' can only be given if kissanime_dl has been run in that directory before")
@@ -223,8 +197,6 @@ def printError():
     printClr("An optional argument is --forcehistory", Color.BOLD)
     print("    Forces a history to be written with the given episodes.")
     print("    This is good for manually setting files you don't want to download when updating")
-    printClr("An optional argument is --openload", Color.BOLD)
-    print("    Forces to download from openload and attempts blogspot if openload is not supported on the page.")
     printClr("An optional argument is --noupdate", Color.BOLD)
     print("    Prevents the program from checking for and updating to the newest version of kissanime_dl")
     printClr("An optional argument is --delay=SEC", Color.BOLD)
@@ -706,23 +678,9 @@ def main():
         thrs = []
 
         def getSingle(link, ses):
-            pure_link = ""
-            if(openload is False):
-                pure_link = getBlogspotUrls(link, ses, sleepy_time, quality_txt, verbose)
-                if(pure_link is False):
-                    pure_link = getOpenLoadUrls(link, ses, sleepy_time, verbose)
-                    if(pure_link is False):
-                        return False
-            elif(openload is True):
-                pure_link = getOpenLoadUrls(link, ses, sleepy_time, verbose)
-                if(pure_link is False):
-                    pure_link = getBlogspotUrls(link, ses, sleepy_time, quality_txt, verbose)
-                    if(pure_link is False):
-                        return False
-
-            if(verbose):
-                print("Found link " + pure_link[1])
-
+        	pure_link = getBlogspotUrls(link, ses, sleepy_time, quality_txt, verbose)
+            if(pure_link is False):
+            	return False
             return pure_link
 
         def getComplete(ses, download_pool):

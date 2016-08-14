@@ -5,6 +5,12 @@ import time
 import re
 import threading
 import sys
+try:
+    # python2
+    from urllib import unquote
+except ImportError:
+    # python3
+    from urllib.parse import unquote
 
 import requests
 from lxml import html
@@ -13,6 +19,14 @@ try:
     from kissenc import kissencCartoon, kissencAsian, kissencAnime
 except ImportError:
     from .kissenc import kissencCartoon, kissencAsian, kissencAnime
+try:
+    from color_print import Color, printClr
+except ImportError:
+    from .color_print import Color, printClr
+try:
+    from js_exc_decode import jsdecode2
+except ImportError:
+    from .js_exc_decode import jsdecode2
 
 mu = threading.Lock()
 print_mu = threading.Lock()
@@ -29,6 +43,7 @@ escapes = ''.join([chr(char) for char in range(1, 32)])
 # PARENT_URL = 2
 
 def getOpenLoadUrls(link, ses, sleeptime, verbose=False):
+    #deprecated!
     time.sleep(sleeptime)
 
     payload = {"s": "openload"}
@@ -45,8 +60,6 @@ def getOpenLoadUrls(link, ses, sleeptime, verbose=False):
     SEL_SER_OPT = "//select[@id='selectServer']/option[text()='Openload']"
     if(len(lxml_parse.xpath(SEL_SER_OPT)) == 0):
         return False
-
-    print('a')
 
     find_str = r"""src=\"https?:\/\/openload.co(.*?)\""""
 
@@ -65,81 +78,27 @@ def getOpenLoadUrls(link, ses, sleeptime, verbose=False):
         printClr("Pattern: " + find_str, Color.RED, Color.BOLD)
         return False
 
-    raw_data = "http://openload.co" + raw_data
-    raw_data = raw_data.replace("embed", "f")
+    raw_data = "https://openload.co" + raw_data
 
     mu.acquire()
     temp_r = ses.get(raw_data)
     mu.release()
 
-    try:
-        aaencoded = re.search(">ﾟωﾟﾉ= (.*?) \('_'\);",
-                              temp_r.content).group(1)
-    except AttributeError as e:
-        printClr("Regex Failure", Color.RED, Color.BOLD)
-        printClr("Could not find '>ﾟωﾟﾉ= (.*?) \('_'\);' in " +
-                 raw_data, Color.RED, Color.BOLD)
-        return False
-    except TypeError:
-        aaencoded = re.search(">ﾟωﾟﾉ= (.*?) \('_'\);",
-                              temp_r.text).group(1)
-    except:
-        printClr("Unknown Regex Error", Color.RED, Color.BOLD)
-        printClr("Pattern: >ﾟωﾟﾉ= (.*?) \('_'\);", Color.RED, Color.BOLD)
-        return False
+    lxml_parse = html.fromstring(temp_r.content)
 
-    # need to add beginning and ending face to complete the encoded string
-    aaencoded = "ﾟωﾟﾉ= " + aaencoded + " ('_');"
+    hiddenurl_xpath = "//*[@id='hiddenurl']/text()"
+    deobfuscatedaa = jsdecode2(lxml_parse.xpath(hiddenurl_xpath)[0])
 
-    decodedaa = decodeAA(aaencoded)
-
-    try:
-        decodedaa = re.search("function\(\)(.*)\(\)", decodedaa).group(1)
-    except AttributeError as e:
-        printClr("Regex Failure", Color.RED, Color.BOLD)
-        printClr("Could not find 'function\(\)(.*)\(\)' in " +
-                 decodedaa, Color.RED, Color.BOLD)
-        return False
-    except:
-        printClr("Unknown Regex Error", Color.RED, Color.BOLD)
-        printClr("Pattern: function\(\)(.*)\(\)", Color.RED, Color.BOLD)
-        return False
-
-    # need to add function call and anonymous function
-    decodedaa = "function()" + decodedaa + "();"
-
-    # sometimes there are double +?
-    decodedaa = decodedaa.replace("++", "+")
-
-    try:
-        decodedaa = re.search(".*(return)(.*)}", decodedaa).group(2)
-    except AttributeError as e:
-        printClr("Regex Failure", Color.RED, Color.BOLD)
-        printClr("Could not find '.*(return)(.*)}' in " +
-                 decodedaa, Color.RED, Color.BOLD)
-        return False
-    except:
-        printClr("Unknown Regex Error", Color.RED, Color.BOLD)
-        printClr("Pattern: .*(return)(.*)}", Color.RED, Color.BOLD)
-        return False
-
-    decodedaa = decodedaa.replace(" ", '')
-    decodedaa = decodedaa.replace("\n", '')
-
-    deobfuscatedaa = decodeFunky(decodedaa)
+    deobfuscatedaa = "https://openload.co/stream/" + deobfuscatedaa
 
     mu.acquire()
-    temp_head = requests.head(deobfuscatedaa)
+    temp_head = ses.head(deobfuscatedaa)
     mu.release()
 
     # openload now redirects
     redirect = temp_head.headers['location']
 
-    print(unquote(redirect))
-
     file_name = unquote(redirect).rpartition('/')[-1]
-
-    print(file_name)
 
     if(verbose):
         print_mu.acquire()
