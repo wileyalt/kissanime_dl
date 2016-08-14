@@ -56,11 +56,6 @@ except ImportError:
     from .js_exc_decode import jsdecode
 
 try:
-    from kissenc import kissencCartoon, kissencAsian, kissencAnime
-except ImportError:
-    from .kissenc import kissencCartoon, kissencAsian, kissencAnime
-
-try:
     from validhead import valid_begin, valid_end
 except ImportError:
     from .validhead import valid_begin, valid_end
@@ -144,7 +139,7 @@ def downloadFile(url, dl_path, PATH_TO_HISTORY, masterurl):
     dl_name = cVunicode(url[NAME])
     dl_path = cVunicode(dl_path)
 
-    if(isinstance(dl_name, str)):
+    if(not isinstance(dl_name, str)):
         # incase any strange happenings happen with extracting the filename
         dl_name = url[DOWNLOAD_URL]
 
@@ -507,27 +502,6 @@ def main():
             print("Found link: " +
                   js_var_t_href[:-1] + vid_lxml_ele[i].attrib['href'])
 
-    mu = threading.Lock()
-    print_mu = threading.Lock()
-
-    DOWNLOAD_URL_X_PATH = "//select[@id='selectQuality']"
-    DOWNLOAD_URL_X_PATH_DEFAULT = DOWNLOAD_URL_X_PATH + "/option[1]/@value"
-    DOWNLOAD_NAME = "//div[@id='divFileName']/b/following::node()"
-    if(quality_txt != ""):
-        DOWNLOAD_URL_X_PATH = DOWNLOAD_URL_X_PATH + \
-            "/option[normalize-space(text() ) = \'" + \
-            quality_txt + "\']/@value"
-    else:
-        # defaults to highest quality
-        DOWNLOAD_URL_X_PATH = DOWNLOAD_URL_X_PATH_DEFAULT
-
-    # arr of all the escape chars
-    escapes = ''.join([chr(char) for char in range(1, 32)])
-
-    if(verbose):
-        print("Vidlinks: ")
-        print(vid_links)
-
     if(len(episode_range) > 0):
         EPISODE_NULL_TITLE = "Episode-000"
 
@@ -606,28 +580,33 @@ def main():
     if(len(vid_links) < MAX_THREADS):
         MAX_THREADS = len(vid_links)
 
-    global dl_url_x_path
-    dl_url_x_path = DOWNLOAD_URL_X_PATH
-
     if(run_legacy or simulate or txtlinks):
         # Run in legacy mode
         def getDLUrls(queuee, links, ses, sleepy_time, sleepy_increment):
             count = 0
             for ur in links:
                 try:
+                    to_add = ""
                     if(openload is False):
-                        if(getBlogspotUrls(queuee, ur, ses, sleepy_increment * count + sleepy_time) is False):
-                            if(getOpenLoadUrls(queuee, ur, ses, sleepy_increment * count + sleepy_time) is False):
-                                printClr(
-                                    "Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
+                        to_add = getBlogspotUrls(ur, ses, sleepy_increment * count + sleepy_time, quality_txt, verbose)
+                        if(to_add is False):
+                            to_add = getOpenLoadUrls(ur, ses, sleepy_increment * count + sleepy_time, verbose)
+                            if(to_add is False):
+                                printClr("Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
                     elif(openload is True):
-                        if(getOpenLoadUrls(queuee, ur, ses, sleepy_increment * count + sleepy_time) is False):
-                            if(getBlogspotUrls(queuee, ur, ses, sleepy_increment * count + sleepy_time) is False):
-                                printClr(
-                                    "Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
+                        to_add = getOpenLoadUrls(ur, ses, sleepy_increment * count + sleepy_time, verbose)
+                        if(to_add is False):
+                            to_add = getBlogspotUrls(ur, ses, sleepy_increment * count + sleepy_time, quality_txt, verbose)
+                            if(to_add is False):
+                                printClr("Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
+
+                    if(to_add is not False):
+                    	queuee.put(to_add)
+
                 except Exception as e:
                     printClr("Error thrown while attempting to find download url: " +
                              repr(e), Color.BOLD, Color.RED)
+                    print(sys.exc_info()[-1].tb_lineno)
                 count += 1
 
         dl_urls = Queue()
@@ -725,15 +704,15 @@ def main():
         def getSingle(link, ses):
             pure_link = ""
             if(openload is False):
-                pure_link = getBlogspotUrls(None, link, ses, sleepy_time)
+                pure_link = getBlogspotUrls(link, ses, sleepy_time, quality_txt, verbose)
                 if(pure_link is False):
-                    pure_link = getOpenLoadUrls(None, link, ses, sleepy_time)
+                    pure_link = getOpenLoadUrls(link, ses, sleepy_time, verbose)
                     if(pure_link is False):
                         return False
             elif(openload is True):
-                pure_link = getOpenLoadUrls(None, link, ses, sleepy_time)
+                pure_link = getOpenLoadUrls(link, ses, sleepy_time, verbose)
                 if(pure_link is False):
-                    pure_link = getBlogspotUrls(None, link, ses, sleepy_time)
+                    pure_link = getBlogspotUrls(link, ses, sleepy_time, quality_txt, verbose)
                     if(pure_link is False):
                         return False
 
@@ -747,28 +726,29 @@ def main():
 
             def updatePool():
                 if(not download_pool.empty()):
-                    dl_link = download_pool.get()
+                    return download_pool.get()
                 else:
-                    dl_link = ""
+                    return ""
 
-            updatePool();
-
+            dl_link = updatePool();
             while(dl_link is not ""):
-            	dl_pkg = getSingle(dl_link)
+                dl_pkg = getSingle(dl_link, ses)
 
-            	if(dl_pkg is False):
-            		#add back to pool
-            		download_pool.put(dl_link)
-            		printClr('Capcha Error @ ' + dl_link, Color.RED, Color.BOLD)
-            		return
+                if(dl_pkg is False):
+                    #add back to pool
+                    download_pool.put(dl_link)
+                    printClr('Capcha Error @ ' + dl_link, Color.RED, Color.BOLD)
+                    return
 
-            	downloadFile(dl_pkg, dl_path, PATH_TO_HISTORY, url)
-            	updatePool()
+                downloadFile(dl_pkg, dl_path, PATH_TO_HISTORY, url)
+                dl_link = updatePool()
 
         for i in range(num_thrs):
-        	thrs.append(threading.Thread(target=getComplete, args=(sess, dl_pool)))
+            thrs.append(threading.Thread(target=getComplete, args=(sess, dl_pool)))
+            thrs[i].daemon = True
+            thrs[i].start()
 
-       	while(threading.active_count() > 1):
+        while(threading.active_count() > 1):
             # wait one tenth of a sec
             time.sleep(0.1)
 

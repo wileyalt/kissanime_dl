@@ -1,5 +1,34 @@
-def getOpenLoadUrls(queuee, link, ses, sleeptime):
+# -*- coding: utf-8 -*-
+# By WILEY YU
 
+import time
+import re
+import threading
+import sys
+
+import requests
+from lxml import html
+
+try:
+    from kissenc import kissencCartoon, kissencAsian, kissencAnime
+except ImportError:
+    from .kissenc import kissencCartoon, kissencAsian, kissencAnime
+
+mu = threading.Lock()
+print_mu = threading.Lock()
+
+DOWNLOAD_URL_X_PATH = "//select[@id='selectQuality']"
+DOWNLOAD_URL_X_PATH_DEFAULT = DOWNLOAD_URL_X_PATH + "/option[1]/@value"
+DOWNLOAD_NAME = "//div[@id='divFileName']/b/following::node()"
+
+# arr of all the escape chars
+escapes = ''.join([chr(char) for char in range(1, 32)])
+
+# NAME = 0
+# DOWNLOAD_URL = 1
+# PARENT_URL = 2
+
+def getOpenLoadUrls(link, ses, sleeptime, verbose=False):
     time.sleep(sleeptime)
 
     payload = {"s": "openload"}
@@ -16,6 +45,8 @@ def getOpenLoadUrls(queuee, link, ses, sleeptime):
     SEL_SER_OPT = "//select[@id='selectServer']/option[text()='Openload']"
     if(len(lxml_parse.xpath(SEL_SER_OPT)) == 0):
         return False
+
+    print('a')
 
     find_str = r"""src=\"https?:\/\/openload.co(.*?)\""""
 
@@ -110,25 +141,27 @@ def getOpenLoadUrls(queuee, link, ses, sleeptime):
 
     print(file_name)
 
-    try:
-        queuee.put([format_txt, discovered_url, link])
-    except TypeError:
-        #for array or null or what ever
-        pass
-
     if(verbose):
         print_mu.acquire()
         print("Found download link: " + redirect)
         print("Found file name: " + file_name)
         print_mu.release()
 
-    return [format_txt, discovered_url, link]
+    return [file_name, redirect, link]
 
-def getBlogspotUrls(queuee, link, ses, sleeptime):
+def getBlogspotUrls(link, ses, sleeptime, quality_txt, verbose=False):
+    if(quality_txt != ""):
+        DOWNLOAD_URL_X_PATH = DOWNLOAD_URL_X_PATH + \
+            "/option[normalize-space(text() ) = \'" + \
+            quality_txt + "\']/@value"
+    else:
+        # defaults to highest quality
+        DOWNLOAD_URL_X_PATH = DOWNLOAD_URL_X_PATH_DEFAULT
+
     time.sleep(sleeptime)
 
     # lets make a copy
-    global dl_url_x_path
+    dl_url_x_path = DOWNLOAD_URL_X_PATH
 
     payload = {"s": "kissanime"}
 
@@ -192,11 +225,8 @@ def getBlogspotUrls(queuee, link, ses, sleeptime):
         printClr("Error in finding method to decode video url from " +
                  link, Color.RED, Color.BOLD)
         return False
-    try:
-        queuee.put([format_txt, discovered_url, link])
-    except TypeError:
-        #for array or null or what ever
-        pass
+
+    print(format_txt)
 
     if(verbose):
         print_mu.acquire()
