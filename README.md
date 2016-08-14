@@ -136,8 +136,11 @@ Optional arguments:
 	Prevents kissanime_dl from autoupdating
 
 --delay=SEC
-    Adds a delay between get requests to the master page
-    Value in seconds
+	Adds a delay between get requests to the master page
+	Value in seconds
+    
+--legacy
+   	Runs the script in legacy mode (before update 1.9.0)
 
 --help: Prints help
 ```
