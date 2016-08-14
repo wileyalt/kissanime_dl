@@ -56,11 +56,6 @@ except ImportError:
     from .js_exc_decode import jsdecode
 
 try:
-    from kissenc import kissencCartoon, kissencAsian, kissencAnime
-except ImportError:
-    from .kissenc import kissencCartoon, kissencAsian, kissencAnime
-
-try:
     from validhead import valid_begin, valid_end
 except ImportError:
     from .validhead import valid_begin, valid_end
@@ -74,6 +69,11 @@ try:
     from jsexec import convJStoPy
 except ImportError:
     from .jsexec import convJStoPy
+
+try:
+    from vidextract import getOpenLoadUrls, getBlogspotUrls
+except ImportError:
+    from .vidextract import getOpenLoadUrls, getBlogspotUrls
 
 url = ''
 JSON_HIS_MASTER_LINK_KEY = "master_link"
@@ -139,7 +139,7 @@ def downloadFile(url, dl_path, PATH_TO_HISTORY, masterurl):
     dl_name = cVunicode(url[NAME])
     dl_path = cVunicode(dl_path)
 
-    if(isinstance(dl_name, str)):
+    if(not isinstance(dl_name, str)):
         # incase any strange happenings happen with extracting the filename
         dl_name = url[DOWNLOAD_URL]
 
@@ -228,6 +228,8 @@ def printError():
     print("    Prevents the program from checking for and updating to the newest version of kissanime_dl")
     printClr("An optional argument is --delay=SEC", Color.BOLD)
     print("    Sets the delay in seconds between requests to the url given in the first argument.")
+    printClr("An optional argument is --legacy", Color.BOLD)
+    print("    It runs the script in legacy mode")
     printClr("An optional argument is --help", Color.BOLD)
 
 
@@ -260,6 +262,7 @@ def main():
     forcehistory = False
     openload = False
     auto_update = True
+    run_legacy = False
 
     episode_range = []
     episode_range_single = False
@@ -371,6 +374,9 @@ def main():
 
             elif(case_arg == "--delay"):
                 sleepy_time = float(psd_arg.split('=')[1])
+
+            elif(case_arg == "--legacy"):
+                run_legacy = True
 
             else:
                 printClr("Unknown argument: " +
@@ -496,27 +502,6 @@ def main():
             print("Found link: " +
                   js_var_t_href[:-1] + vid_lxml_ele[i].attrib['href'])
 
-    mu = threading.Lock()
-    print_mu = threading.Lock()
-
-    DOWNLOAD_URL_X_PATH = "//select[@id='selectQuality']"
-    DOWNLOAD_URL_X_PATH_DEFAULT = DOWNLOAD_URL_X_PATH + "/option[1]/@value"
-    DOWNLOAD_NAME = "//div[@id='divFileName']/b/following::node()"
-    if(quality_txt != ""):
-        DOWNLOAD_URL_X_PATH = DOWNLOAD_URL_X_PATH + \
-            "/option[normalize-space(text() ) = \'" + \
-            quality_txt + "\']/@value"
-    else:
-        # defaults to highest quality
-        DOWNLOAD_URL_X_PATH = DOWNLOAD_URL_X_PATH_DEFAULT
-
-    # arr of all the escape chars
-    escapes = ''.join([chr(char) for char in range(1, 32)])
-
-    if(verbose):
-        print("Vidlinks: ")
-        print(vid_links)
-
     if(len(episode_range) > 0):
         EPISODE_NULL_TITLE = "Episode-000"
 
@@ -595,305 +580,179 @@ def main():
     if(len(vid_links) < MAX_THREADS):
         MAX_THREADS = len(vid_links)
 
-    global dl_url_x_path
-    dl_url_x_path = DOWNLOAD_URL_X_PATH
-
-    def getOpenLoadUrls(queuee, link, ses, sleeptime):
-
-        time.sleep(sleeptime)
-
-        payload = {"s": "openload"}
-
-        mu.acquire()
-        html_raw = ses.get(link, params=payload)
-        mu.release()
-
-        html_str = html_raw.content
-
-        lxml_parse = html.fromstring(html_str)
-
-        # Selected server option
-        SEL_SER_OPT = "//select[@id='selectServer']/option[text()='Openload']"
-        if(len(lxml_parse.xpath(SEL_SER_OPT)) == 0):
-            return False
-
-        find_str = r"""src=\"https?:\/\/openload.co(.*?)\""""
-
-        try:
-            raw_data = re.search(find_str, html_str).group(1)
-        except AttributeError as e:
-            printClr("Regex Failure", Color.RED, Color.BOLD)
-            printClr("Could not find '" + find_str +
-                     "'", Color.RED, Color.BOLD)
-            return False
-        except TypeError:
-            raw_data = re.search(find_str, html_str.decode(
-                html_raw.encoding)).group(1)
-        except:
-            printClr("Unknown Regex Error", Color.RED, Color.BOLD)
-            printClr("Pattern: " + find_str, Color.RED, Color.BOLD)
-            return False
-
-        raw_data = "http://openload.co" + raw_data
-        raw_data = raw_data.replace("embed", "f")
-
-        mu.acquire()
-        temp_r = ses.get(raw_data)
-        mu.release()
-
-        try:
-            aaencoded = re.search(">ﾟωﾟﾉ= (.*?) \('_'\);",
-                                  temp_r.content).group(1)
-        except AttributeError as e:
-            printClr("Regex Failure", Color.RED, Color.BOLD)
-            printClr("Could not find '>ﾟωﾟﾉ= (.*?) \('_'\);' in " +
-                     raw_data, Color.RED, Color.BOLD)
-            return False
-        except TypeError:
-            aaencoded = re.search(">ﾟωﾟﾉ= (.*?) \('_'\);",
-                                  temp_r.text).group(1)
-        except:
-            printClr("Unknown Regex Error", Color.RED, Color.BOLD)
-            printClr("Pattern: >ﾟωﾟﾉ= (.*?) \('_'\);", Color.RED, Color.BOLD)
-            return False
-
-        # need to add beginning and ending face to complete the encoded string
-        aaencoded = "ﾟωﾟﾉ= " + aaencoded + " ('_');"
-
-        decodedaa = decodeAA(aaencoded)
-
-        try:
-            decodedaa = re.search("function\(\)(.*)\(\)", decodedaa).group(1)
-        except AttributeError as e:
-            printClr("Regex Failure", Color.RED, Color.BOLD)
-            printClr("Could not find 'function\(\)(.*)\(\)' in " +
-                     decodedaa, Color.RED, Color.BOLD)
-            return False
-        except:
-            printClr("Unknown Regex Error", Color.RED, Color.BOLD)
-            printClr("Pattern: function\(\)(.*)\(\)", Color.RED, Color.BOLD)
-            return False
-
-        # need to add function call and anonymous function
-        decodedaa = "function()" + decodedaa + "();"
-
-        # sometimes there are double +?
-        decodedaa = decodedaa.replace("++", "+")
-
-        try:
-            decodedaa = re.search(".*(return)(.*)}", decodedaa).group(2)
-        except AttributeError as e:
-            printClr("Regex Failure", Color.RED, Color.BOLD)
-            printClr("Could not find '.*(return)(.*)}' in " +
-                     decodedaa, Color.RED, Color.BOLD)
-            return False
-        except:
-            printClr("Unknown Regex Error", Color.RED, Color.BOLD)
-            printClr("Pattern: .*(return)(.*)}", Color.RED, Color.BOLD)
-            return False
-
-        decodedaa = decodedaa.replace(" ", '')
-        decodedaa = decodedaa.replace("\n", '')
-
-        deobfuscatedaa = decodeFunky(decodedaa)
-
-        mu.acquire()
-        temp_head = requests.head(deobfuscatedaa)
-        mu.release()
-
-        # openload now redirects
-        redirect = temp_head.headers['location']
-
-        print(unquote(redirect))
-
-        file_name = unquote(redirect).rpartition('/')[-1]
-
-        print(file_name)
-
-        queuee.put([file_name, redirect, link])
-
-        if(verbose):
-            print_mu.acquire()
-            print("Found download link: " + redirect)
-            print("Found file name: " + file_name)
-            print_mu.release()
-
-    def getBlogspotUrls(queuee, link, ses, sleeptime):
-        time.sleep(sleeptime)
-
-        # lets make a copy
-        global dl_url_x_path
-
-        payload = {"s": "kissanime"}
-
-        mu.acquire()
-        html_raw = ses.get(link, params=payload)
-        mu.release()
-
-        html_str = html_raw.content
-
-        temp_tree = html.fromstring(html_str)
-        raw_data = temp_tree.xpath(DOWNLOAD_NAME)
-
-        if(len(raw_data) == 0):
-            return False
-
-        def sanitize(funky_str):
-            # removes all those escape chars from the string
-            try:
-                ft = funky_str.replace(" ", '').translate(None, escapes)
-            except TypeError:
+    if(run_legacy or simulate or txtlinks):
+        # Run in legacy mode
+        def getDLUrls(queuee, links, ses, sleepy_time, sleepy_increment):
+            count = 0
+            for ur in links:
                 try:
-                    ft = funky_str.replace(" ", '').translate(
-                        str.maketrans(dict.fromkeys(escapes)))
-                except AttributeError:
-                    # python 2
-                    ft = funky_str.replace(" ", '').translate(
-                        dict.fromkeys(escapes))
+                    to_add = ""
+                    if(openload is False):
+                        to_add = getBlogspotUrls(ur, ses, sleepy_increment * count + sleepy_time, quality_txt, verbose)
+                        if(to_add is False):
+                            to_add = getOpenLoadUrls(ur, ses, sleepy_increment * count + sleepy_time, verbose)
+                            if(to_add is False):
+                                printClr("Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
+                    elif(openload is True):
+                        to_add = getOpenLoadUrls(ur, ses, sleepy_increment * count + sleepy_time, verbose)
+                        if(to_add is False):
+                            to_add = getBlogspotUrls(ur, ses, sleepy_increment * count + sleepy_time, quality_txt, verbose)
+                            if(to_add is False):
+                                printClr("Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
 
-            return ft
+                    if(to_add is not False):
+                    	queuee.put(to_add)
 
-        format_txt = sanitize(raw_data[0])
+                except Exception as e:
+                    printClr("Error thrown while attempting to find download url: " +
+                             repr(e), Color.BOLD, Color.RED)
+                    print(sys.exc_info()[-1].tb_lineno)
+                count += 1
 
-        # With email protection, sometimes only the [ is shown
-        if(format_txt == "["):
-            # hmm. this is a hacky fix
-            # The rest of the data is generally in 5?
-            format_txt = format_txt + sanitize(raw_data[5])
+        dl_urls = Queue()
+        thrs = []
 
-            # no quality found
-        if(len(temp_tree.xpath(dl_url_x_path)) == 0 and quality_txt != ""):
-            printClr("Quality " + quality_txt +
-                     " is not found", Color.RED, Color.BOLD)
-            printClr("Defaulting to highest quality", Color.BOLD)
-            dl_url_x_path = DOWNLOAD_URL_X_PATH_DEFAULT
+        try:
+            # python2
+            lst_to_send = [vid_links[i::MAX_THREADS] for i in xrange(MAX_THREADS)]
+        except NameError:
+            # python3
+            lst_to_send = [vid_links[i::MAX_THREADS] for i in range(MAX_THREADS)]
 
-        discovered_url = ""
+        for i in range(MAX_THREADS):
+            if(verbose):
+                print("Creating Thread " + str(i))
+            loc_data = lst_to_send[i]
+            if(verbose):
+                print("Data Size: " + str(len(loc_data)))
+                print(loc_data)
+            thrs.append(threading.Thread(target=getDLUrls, args=(
+                dl_urls, loc_data, sess, sleepy_time * i + sleepy_time, sleepy_time * MAX_THREADS)))
+            thrs[i].daemon = True
+            thrs[i].start()
 
-        if("/Anime/" in link):
-            # site is kissanime
-            discovered_url = kissencAnime(temp_tree.xpath(dl_url_x_path)[0])
-        elif("/Cartoon/" in link):
-            # site is kisscartoon
-            discovered_url = kissencCartoon(
-                temp_tree.xpath(dl_url_x_path)[0], ses)
-        elif("/Drama/" in link):
-            # site is kissasian
-            discovered_url = kissencAsian(
-                temp_tree.xpath(dl_url_x_path)[0], ses)
-        else:
-            # unknown site
-            printClr("Error in finding method to decode video url from " +
-                     link, Color.RED, Color.BOLD)
-            return False
+        while(threading.active_count() > 1):
+            # wait one tenth of a sec
+            time.sleep(0.1)
 
-        queuee.put([format_txt, discovered_url, link])
-        if(verbose):
-            print_mu.acquire()
-            print("Found download link: " + discovered_url)
-            print("Found file name: " + format_txt)
-            print_mu.release()
+        del thrs
+        del lst_to_send
 
-    def getDLUrls(queuee, links, ses, sleepy_time, sleepy_increment):
-        count = 0
-        for ur in links:
-            try:
-                if(openload is False):
-                    if(getBlogspotUrls(queuee, ur, ses, sleepy_increment * count + sleepy_time) is False):
-                        if(getOpenLoadUrls(queuee, ur, ses, sleepy_increment * count + sleepy_time) is False):
-                            printClr(
-                                "Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
-                elif(openload is True):
-                    if(getOpenLoadUrls(queuee, ur, ses, sleepy_increment * count + sleepy_time) is False):
-                        if(getBlogspotUrls(queuee, ur, ses, sleepy_increment * count + sleepy_time) is False):
-                            printClr(
-                                "Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
-            except Exception as e:
-                printClr("Error thrown while attempting to find download url: " +
-                         repr(e), Color.BOLD, Color.RED)
-            count += 1
+        # lets clean up
+        del tree
+        del vid_lxml_ele
+        del r
+        del vid_links
 
-    dl_urls = Queue()
-    thrs = []
+        dl_urls = [item for item in dl_urls.queue]
 
-    try:
-        # python2
-        lst_to_send = [vid_links[i::MAX_THREADS] for i in xrange(MAX_THREADS)]
-    except NameError:
-        # python3
-        lst_to_send = [vid_links[i::MAX_THREADS] for i in range(MAX_THREADS)]
+        if(simulate):
+            print("Finished simulation")
+            if(forcehistory):
+                writeHistory([lnk[PARENT_URL]
+                              for lnk in dl_urls], PATH_TO_HISTORY, url)
 
-    for i in range(MAX_THREADS):
-        if(verbose):
-            print("Creating Thread " + str(i))
-        loc_data = lst_to_send[i]
-        if(verbose):
-            print("Data Size: " + str(len(loc_data)))
-            print(loc_data)
-        thrs.append(threading.Thread(target=getDLUrls, args=(
-            dl_urls, loc_data, sess, sleepy_time * i + sleepy_time, sleepy_time * MAX_THREADS)))
-        thrs[i].daemon = True
-        thrs[i].start()
+            printClr("Found " + str(len(dl_urls)) +
+                     " links", Color.BOLD, Color.GREEN)
+            printClr("Elapsed time: " + getElapsedTime(start_time), Color.BOLD)
+            return
 
-    while(threading.active_count() > 1):
-        # wait one tenth of a sec
-        time.sleep(0.1)
+        if(txtlinks):
+            print("Finished grabbing download links")
+            FILE_NAME = "Links.txt"
+            FILE_PATH = dl_path + "/" + FILE_NAME
 
-    del thrs
-    del lst_to_send
+            if(forcehistory):
+                writeHistory([lnk[PARENT_URL]
+                              for lnk in dl_urls], PATH_TO_HISTORY, url)
 
-    # lets clean up
-    del tree
-    del vid_lxml_ele
-    del r
-    del vid_links
+            with open(FILE_PATH, 'w') as txt_data:
+                for item in dl_urls:
+                    txt_data.write(item[DOWNLOAD_URL] + "\n")
 
-    dl_urls = [item for item in dl_urls.queue]
+            printClr("Found " + str(len(dl_urls)) +
+                     " links", Color.BOLD, Color.GREEN)
+            printClr("Elapsed time: " + getElapsedTime(start_time), Color.BOLD)
+            return
 
-    if(simulate):
-        print("Finished simulation")
-        if(forcehistory):
-            writeHistory([lnk[PARENT_URL]
-                          for lnk in dl_urls], PATH_TO_HISTORY, url)
+        thrs = []
 
-        printClr("Found " + str(len(dl_urls)) +
-                 " links", Color.BOLD, Color.GREEN)
-        printClr("Elapsed time: " + getElapsedTime(start_time), Color.BOLD)
-        return
+        # more threads to start downloading
+        lazy_programming = 0
+        for dl_sing_url in dl_urls:
+            thrs.append(threading.Thread(target=downloadFile, args=(
+                dl_sing_url, dl_path, PATH_TO_HISTORY, url)))
+            thrs[lazy_programming].daemon = True
+            thrs[lazy_programming].start()
+            lazy_programming += 1
 
-    if(txtlinks):
-        print("Finished grabbing download links")
-        FILE_NAME = "Links.txt"
-        FILE_PATH = dl_path + "/" + FILE_NAME
+        while(threading.active_count() > 1):
+            # wait one tenth of a sec
+            time.sleep(0.1)
 
-        if(forcehistory):
-            writeHistory([lnk[PARENT_URL]
-                          for lnk in dl_urls], PATH_TO_HISTORY, url)
-
-        with open(FILE_PATH, 'w') as txt_data:
-            for item in dl_urls:
-                txt_data.write(item[DOWNLOAD_URL] + "\n")
-
-        printClr("Found " + str(len(dl_urls)) +
-                 " links", Color.BOLD, Color.GREEN)
-        printClr("Elapsed time: " + getElapsedTime(start_time), Color.BOLD)
-        return
-
-    thrs = []
-
-    # more threads to start downloading
-    lazy_programming = 0
-    for dl_sing_url in dl_urls:
-        thrs.append(threading.Thread(target=downloadFile, args=(
-            dl_sing_url, dl_path, PATH_TO_HISTORY, url)))
-        thrs[lazy_programming].daemon = True
-        thrs[lazy_programming].start()
-        lazy_programming += 1
-
-    while(threading.active_count() > 1):
-        # wait one tenth of a sec
-        time.sleep(0.1)
-
-    printClr("Downloaded " + str(len(dl_urls)) +
+        printClr("Downloaded " + str(len(dl_urls)) +
              " files at " + dl_path, Color.BOLD, Color.GREEN)
+
+    else:
+        # Run in new mode
+
+        num_thrs = 5
+        dl_pool = Queue()
+        map(dl_pool.put, vid_links)
+        thrs = []
+
+        def getSingle(link, ses):
+            pure_link = ""
+            if(openload is False):
+                pure_link = getBlogspotUrls(link, ses, sleepy_time, quality_txt, verbose)
+                if(pure_link is False):
+                    pure_link = getOpenLoadUrls(link, ses, sleepy_time, verbose)
+                    if(pure_link is False):
+                        return False
+            elif(openload is True):
+                pure_link = getOpenLoadUrls(link, ses, sleepy_time, verbose)
+                if(pure_link is False):
+                    pure_link = getBlogspotUrls(link, ses, sleepy_time, quality_txt, verbose)
+                    if(pure_link is False):
+                        return False
+
+            if(verbose):
+                print("Found link " + pure_link[1])
+
+            return pure_link
+
+        def getComplete(ses, download_pool):
+            dl_link = ""
+
+            def updatePool():
+                if(not download_pool.empty()):
+                    return download_pool.get()
+                else:
+                    return ""
+
+            dl_link = updatePool();
+            while(dl_link is not ""):
+                dl_pkg = getSingle(dl_link, ses)
+
+                if(dl_pkg is False):
+                    #add back to pool
+                    download_pool.put(dl_link)
+                    printClr('Capcha Error @ ' + dl_link, Color.RED, Color.BOLD)
+                    return
+
+                downloadFile(dl_pkg, dl_path, PATH_TO_HISTORY, url)
+                dl_link = updatePool()
+
+        for i in range(num_thrs):
+            thrs.append(threading.Thread(target=getComplete, args=(sess, dl_pool)))
+            thrs[i].daemon = True
+            thrs[i].start()
+
+        while(threading.active_count() > 1):
+            # wait one tenth of a sec
+            time.sleep(0.1)
+
+        printClr("Downloaded " + str(len(vid_links) - dl_pool.qsize()) + " files at " + dl_path, Color.BOLD, Color.GREEN)
+
+
     printClr("Elapsed time: " + getElapsedTime(start_time), Color.BOLD)
