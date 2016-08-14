@@ -79,9 +79,9 @@ setup(name='kissanime_dl',
       license='MIT',
       packages=['kissanime_dl'],
       install_requires=[
-          'requests==2.10.0',
+          'requests==2.11.0',
           'lxml>=3.5.0',
-          'js2py==0.37',
+          'js2py==0.39',
           'pycryptodome==3.4'
       ],
       zip_safe=False,

@@ -226,8 +226,6 @@ def getBlogspotUrls(link, ses, sleeptime, quality_txt, verbose=False):
                  link, Color.RED, Color.BOLD)
         return False
 
-    print(format_txt)
-
     if(verbose):
         print_mu.acquire()
         print("Found download link: " + discovered_url)
