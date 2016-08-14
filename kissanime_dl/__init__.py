@@ -97,7 +97,8 @@ def autoUpdate():
 
 
 def printCapchaWarning():
-    printClr("Warning: KissCartoon and KissAsian tend to ask for capcha after 5 video intervals.",
+    printClr("""Warning: Version 1.9.0 and above uses a new method to download movies. It may be slower, but should still download everything.
+Use the --legacy flag (not guaranteed to work!) if you want the old method.""",
              Color.BOLD, Color.YELLOW)
 
 
@@ -740,7 +741,7 @@ def main():
                 if(dl_pkg is False):
                     #add back to pool
                     download_pool.put(dl_link)
-                    printClr('Capcha Error @ ' + dl_link, Color.RED, Color.BOLD)
+                    printClr('Captcha Error @ ' + dl_link, Color.RED, Color.BOLD)
                     return
 
                 downloadFile(dl_pkg, dl_path, PATH_TO_HISTORY, url)
