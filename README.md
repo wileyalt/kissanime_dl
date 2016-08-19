@@ -40,11 +40,11 @@ Alternative installation instructions for Linux if facing problems with  `pip`
 sudo apt-get remove python-pip
 
 # Install dependencies
-sudo apt-get install python-setuptools libxslt1-dev python-dev zlib1g-dev build-essential libgmp3c2 pypy-dev
+sudo apt-get install python-setuptools libxslt1-dev python-dev zlib1g-dev build-essential libgmp10 pypy-dev
 sudo easy_install pip
 sudo pip install --upgrade requests
 sudo pip install js2py
-sudo pip install cryptodome
+sudo pip install pycryptodome
 sudo easy_install lxml==3.6.0
 
 # Install kissanime_dl
