@@ -109,18 +109,20 @@ def getOpenLoadUrls(link, ses, sleeptime, verbose=False):
     return [file_name, redirect, link]
 
 def getBlogspotUrls(link, ses, sleeptime, quality_txt, verbose=False):
+    genned_x_path = DOWNLOAD_URL_X_PATH
+
     if(quality_txt != ""):
-        DOWNLOAD_URL_X_PATH = DOWNLOAD_URL_X_PATH + \
+        genned_x_path = genned_x_path + \
             "/option[normalize-space(text() ) = \'" + \
             quality_txt + "\']/@value"
     else:
         # defaults to highest quality
-        DOWNLOAD_URL_X_PATH = DOWNLOAD_URL_X_PATH_DEFAULT
+        genned_x_path = DOWNLOAD_URL_X_PATH_DEFAULT
 
     time.sleep(sleeptime)
 
     # lets make a copy
-    dl_url_x_path = DOWNLOAD_URL_X_PATH
+    dl_url_x_path = genned_x_path
 
     payload = {"s": "kissanime"}
 
