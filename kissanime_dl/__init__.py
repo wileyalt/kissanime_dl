@@ -209,9 +209,6 @@ def getElapsedTime(s_time):
 
 # MAIN
 def main():
-    # required for py2js
-    sys.setrecursionlimit(6000)
-
     LINK_HISTORY_FILE_NAME = "kissanime_dl_history.json"
     # Json data should look like this:
     # [
@@ -241,6 +238,12 @@ def main():
 
     sleepy_time = 0.1
 
+    # print that capcha warning
+    printCapchaWarning()
+
+    # gets first arg
+    url = sys.argv[1]
+
     # optional args
     if(len(sys.argv) > 3):
         for i in range(3, len(sys.argv)):
@@ -260,13 +263,13 @@ def main():
                 first = ''
                 second = ''
                 if('%' not in eps):
+                    #if only one episode download
                     episode_range_single = True
                     first = eps
                     second = "000"
-                    while(len(first) < 3):
-                        first = "0" + first
-                else:
 
+                else:
+                    #range of downloads
                     eps = eps.split('%')
                     if(len(eps) == 1):
                         first = eps[0]
@@ -276,28 +279,27 @@ def main():
                             printError()
                             return
 
-                        while(len(first) < 3):
-                            first = "0" + first
                         second = "000"
 
                     elif(len(eps) == 2):
                         first = eps[0]
-                        while(len(first) < 3):
-                            first = "0" + first
                         second = eps[1]
-                        while(len(second) < 3):
-                            second = "0" + second
-
                         if(first == "000" and second == "000"):
                             printClr(
                                 "Error: Both arguments cannot be blank", Color.BOLD, Color.RED)
                             printError()
                             return
 
+                while(len(first) < 3 and "kissasian" not in url):
+                    first = "0" + first
+
+                while(len(second) < 3 and "kissasian" not in url):
+                        second = "0" + second
+
                 EPS_PREFIX = "Episode-"
-                if(EPS_PREFIX not in first and len(first) == 3):
+                if(EPS_PREFIX not in first):
                     first = EPS_PREFIX + first
-                if(EPS_PREFIX not in second and len(second) == 3 and len(eps) == 2):
+                if(EPS_PREFIX not in second):
                     second = EPS_PREFIX + second
 
                 episode_range = [first, second]
@@ -362,12 +364,6 @@ def main():
     # check for updates
     if auto_update:
         autoUpdate()
-
-    # print that capcha warning
-    printCapchaWarning()
-
-    # gets first arg
-    url = sys.argv[1]
 
     if(sys.argv[2] == '-'):
         splits = url.split('/')
@@ -487,13 +483,11 @@ def main():
                 break
 
         if(not fst_ln_fnd and episode_range[0] != EPISODE_NULL_TITLE):
-            printClr(episode_range[
-                     0] + " is not a valid episode", Color.BOLD, Color.RED)
+            printClr(episode_range[0] + " is not a valid episode", Color.BOLD, Color.RED)
             return
 
         if(not snd_ln_fnd and episode_range[1] != EPISODE_NULL_TITLE and not episode_range_single):
-            printClr(episode_range[
-                     1] + " is not a valid episode", Color.BOLD, Color.RED)
+            printClr(episode_range[1] + " is not a valid episode", Color.BOLD, Color.RED)
             return
 
         rm_links = []
@@ -516,6 +510,9 @@ def main():
                     rm_links.append(ln)
                 else:
                     break
+
+        #debug
+        print(episode_range[0])
 
         if(episode_range_single):
             for ln in vid_links:
@@ -570,7 +567,7 @@ def main():
                                 printClr("Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
 
                     if(to_add is not False):
-                    	queuee.put(to_add)
+                        queuee.put(to_add)
 
                 except Exception as e:
                     printClr("Error thrown while attempting to find download url: " +
