@@ -114,7 +114,7 @@ def writeHistory(urls_arr, PATH_TO_HISTORY, masterurl):
 # cross version
 def cVunicode(any):
     try:
-        return unicode(any, utf8)
+        return any.encode('utf-8').strip()
     except NameError:
         return str(any)
 
