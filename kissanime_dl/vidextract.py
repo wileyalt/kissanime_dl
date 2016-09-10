@@ -48,11 +48,11 @@ def uprint(any):
         any.encode(sys.stdout.encoding)
         if isinstance(any, str) and sys.version_info < (3, 0, 0):
             print(any.encode('utf-8').strip() )
+            return
         print(any)
     except UnicodeEncodeError:
         return "Unsupported characters in " + sys.stdout.encoding
 
-	
 
 def getOpenLoadUrls(link, ses, sleeptime, verbose=False):
     #deprecated!
@@ -115,7 +115,7 @@ def getOpenLoadUrls(link, ses, sleeptime, verbose=False):
     if(verbose):
         print_mu.acquire()
         print("Found download link: " + redirect)
-        print("Found file name: " + cVunicode(file_name))
+        uprint("Found file name: " + file_name)
         print_mu.release()
 
     return [file_name, redirect, link]

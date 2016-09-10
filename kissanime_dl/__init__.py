@@ -123,6 +123,7 @@ def uprint(any):
         any.encode(sys.stdout.encoding)
         if isinstance(any, str) and sys.version_info < (3, 0, 0):
             print(any.encode('utf-8').strip() )
+            return
         print(any)
     except UnicodeEncodeError:
         return "Unsupported characters in " + sys.stdout.encoding
@@ -132,9 +133,9 @@ def downloadFile(url, dl_path, PATH_TO_HISTORY, masterurl):
     dl_name = cVunicode(url[NAME])
     dl_path = cVunicode(dl_path)
 
-    if(not isinstance(dl_name, str)):
+    if(not isinstance(dl_name, str) and not isinstance(dl_name, unicode)):
         # incase any strange happenings happen with extracting the filename
-        dl_name = url[DOWNLOAD_URL]
+        dl_name = url[DOWNLOAD_URL].split('/')[-1]
 
     if(len(dl_name) > 252):
         dl_name = dl_name[:252]
@@ -175,7 +176,7 @@ def downloadFile(url, dl_path, PATH_TO_HISTORY, masterurl):
     write_hist.release()
 
     console_mu.acquire()
-    print("Finished downloading " + dl_name)
+    uprint("Finished downloading " + dl_name)
     console_mu.release()
 
 def printError():
