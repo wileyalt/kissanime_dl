@@ -25,6 +25,8 @@ js2py
 
 pycryptodome
 
+pip
+
 #Installation
 ##*nix or OSX:
 
