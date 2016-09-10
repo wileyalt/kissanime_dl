@@ -241,6 +241,12 @@ def main():
     # print that capcha warning
     printCapchaWarning()
 
+    if(len(sys.argv) < 3):
+        printClr("Error: kissanime_dl takes in 2 args, the url, and the path to download to",
+                 Color.BOLD, Color.RED)
+        printError()
+        return
+
     # gets first arg
     url = sys.argv[1]
 
@@ -354,12 +360,6 @@ def main():
                          sys.argv[i], Color.BOLD, Color.RED)
                 printError()
                 return
-
-    if(len(sys.argv) < 3):
-        printClr("Error: kissanime_dl takes in 2 args, the url, and the path to download to",
-                 Color.BOLD, Color.RED)
-        printError()
-        return
 
     # check for updates
     if auto_update:
