@@ -42,6 +42,18 @@ escapes = ''.join([chr(char) for char in range(1, 32)])
 # DOWNLOAD_URL = 1
 # PARENT_URL = 2
 
+# cross version
+def uprint(any):
+    try:
+        any.encode(sys.stdout.encoding)
+        if isinstance(any, str) and sys.version_info < (3, 0, 0):
+            print(any.encode('utf-8').strip() )
+        print(any)
+    except UnicodeEncodeError:
+        return "Unsupported characters in " + sys.stdout.encoding
+
+	
+
 def getOpenLoadUrls(link, ses, sleeptime, verbose=False):
     #deprecated!
     time.sleep(sleeptime)
@@ -103,7 +115,7 @@ def getOpenLoadUrls(link, ses, sleeptime, verbose=False):
     if(verbose):
         print_mu.acquire()
         print("Found download link: " + redirect)
-        print("Found file name: " + file_name)
+        print("Found file name: " + cVunicode(file_name))
         print_mu.release()
 
     return [file_name, redirect, link]
@@ -189,8 +201,8 @@ def getBlogspotUrls(link, ses, sleeptime, quality_txt, verbose=False):
 
     if(verbose):
         print_mu.acquire()
-        print("Found download link: " + discovered_url)
-        print("Found file name: " + format_txt)
+        uprint("Found download link: " + discovered_url)
+        uprint("Found file name: " + format_txt)
         print_mu.release()
 
     return [format_txt, discovered_url, link]

@@ -113,10 +113,19 @@ def writeHistory(urls_arr, PATH_TO_HISTORY, masterurl):
 
 # cross version
 def cVunicode(any):
-    try:
+    if isinstance(any, str) and sys.version_info < (3, 0, 0):
         return any.encode('utf-8').strip()
-    except NameError:
-        return str(any)
+    return any
+	
+# cross version of printing unicode
+def uprint(any):
+    try:
+        any.encode(sys.stdout.encoding)
+        if isinstance(any, str) and sys.version_info < (3, 0, 0):
+            print(any.encode('utf-8').strip() )
+        print(any)
+    except UnicodeEncodeError:
+        return "Unsupported characters in " + sys.stdout.encoding
 
 
 def downloadFile(url, dl_path, PATH_TO_HISTORY, masterurl):
@@ -136,11 +145,11 @@ def downloadFile(url, dl_path, PATH_TO_HISTORY, masterurl):
     if(os.path.isfile(f_name)):
         size = os.path.getsize(f_name)
         console_mu.acquire()
-        print("Resuming download of " + dl_name)
+        uprint("Resuming download of " + dl_name)
         console_mu.release()
     else:
         console_mu.acquire()
-        print("Beginning to download " + dl_name)
+        uprint("Beginning to download " + dl_name)
         console_mu.release()
 
     # Range Header prepare
