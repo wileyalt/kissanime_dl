@@ -13,7 +13,7 @@ import os
 # Custom install command class for setup()
 
 
-class custom_install(install):
+class custom_install(object):
     """Ensures setuptools uses custom install_scripts."""
 
     def run(self):
