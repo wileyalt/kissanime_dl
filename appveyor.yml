@@ -19,6 +19,7 @@ init:
   - "ECHO %PYTHON% %PYTHON_VERSION% %PYTHON_ARCH%"
 
 install:
+  - "set STATICBUILD=true"
   - "%PYTHON%/Scripts/pip.exe install ."
 
 test_script:
