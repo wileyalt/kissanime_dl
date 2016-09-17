@@ -218,7 +218,7 @@ def getElapsedTime(s_time):
 
 
 # MAIN
-def main():
+def main(args):
     LINK_HISTORY_FILE_NAME = "kissanime_dl_history.json"
     # Json data should look like this:
     # [
@@ -251,19 +251,19 @@ def main():
     # print that capcha warning
     printCapchaWarning()
 
-    if(len(sys.argv) < 3):
+    if(len(args) < 2):
         printClr("Error: kissanime_dl takes in 2 args, the url, and the path to download to",
                  Color.BOLD, Color.RED)
         printError()
         return
 
     # gets first arg
-    url = sys.argv[1]
+    url = args[0]
 
     # optional args
-    if(len(sys.argv) > 3):
-        for i in range(3, len(sys.argv)):
-            psd_arg = sys.argv[i]
+    if(len(args) > 2):
+        for i in range(2, len(args)):
+            psd_arg = args[i]
             case_arg = psd_arg.split('=')[0]
             if(case_arg == "--verbose"):
                 verbose = True
@@ -367,7 +367,7 @@ def main():
 
             else:
                 printClr("Unknown argument: " +
-                         sys.argv[i], Color.BOLD, Color.RED)
+                         args[i], Color.BOLD, Color.RED)
                 printError()
                 return
 
@@ -375,12 +375,12 @@ def main():
     if auto_update:
         autoUpdate()
 
-    if(sys.argv[2] == '-'):
+    if(args[1] == '-'):
         splits = url.split('/')
         dl_dir = splits[-1] if splits[-1] else splits[-2]
         dl_path = os.path.abspath(dl_dir)
     else:
-        dl_path = os.path.abspath(sys.argv[2])
+        dl_path = os.path.abspath(args[1])
 
     PATH_TO_HISTORY = dl_path + "/" + LINK_HISTORY_FILE_NAME
 

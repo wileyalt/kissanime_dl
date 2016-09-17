@@ -173,3 +173,9 @@ kissanime-dl https://kissanime.to/Anime/NHK-ni-Youkoso ~/Videos/NHK --txtlinks
 kissanime-dl https://kissanime.to/Anime/NHK-ni-Youkoso ~/Videos/NHK --forcehistory
 ```
 I think you get the picture
+
+#Usage for non-commandline
+```
+import kissanime_dl
+kissanime_dl.main(['update', '.', '--simulate'])
+```
