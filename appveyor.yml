@@ -20,6 +20,7 @@ init:
 
 install:
   - "set STATICBUILD=true"
+  - "%PYTHON%/Scripts/pip.exe install lxml"
   - "%PYTHON%/Scripts/pip.exe install ."
 
 test_script:
