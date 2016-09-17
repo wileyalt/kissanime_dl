@@ -1,6 +1,7 @@
 #kissanime-dl
 
 [![Build Status](https://travis-ci.org/wileyyugioh/kissanime_dl.svg?branch=master)](https://travis-ci.org/wileyyugioh/kissanime_dl)
+[![Build status](https://ci.appveyor.com/api/projects/status/github/wileyyugioh/kissanime_dl?svg=true)](https://ci.appveyor.com/api/projects/status/github/wileyyguioh/)
 
 
 Downloads all mp4s from a kissanime, kisscartoon, or kissasian mastersite!
