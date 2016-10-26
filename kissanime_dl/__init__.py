@@ -79,7 +79,7 @@ def autoUpdate():
     pip.main(['install', '-U', '--no-cache-dir', '--no-deps', 'kissanime_dl'])
 
 
-def printCapchaWarning():
+def printCaptchaWarning():
     printClr("""Warning: Version 1.9.0 and above uses a new method to download movies. It may be slower, but should still download everything.
 Use the --legacy flag (not guaranteed to work!) if you want the old method.""",
              Color.BOLD, Color.YELLOW)
@@ -129,8 +129,13 @@ def uprint(any):
         return "Unsupported characters in " + sys.stdout.encoding
 
 
-def downloadFile(url, dl_path, PATH_TO_HISTORY, masterurl):
-    dl_name = cVunicode(url[NAME])
+def downloadFile(url, dl_path, PATH_TO_HISTORY, masterurl, should_autogen):
+
+    if(should_autogen):
+        dl_name = cVunicode(url[PARENT_URL].split('/')[-1].split('?')[0])
+    else:
+        dl_name = cVunicode(url[NAME])
+
     dl_path = cVunicode(dl_path)
 
     if(not isinstance(dl_name, str) and not isinstance(dl_name, unicode)):
@@ -209,6 +214,8 @@ def printError():
     print("    Sets the delay in seconds between requests to the url given in the first argument.")
     printClr("An optional argument is --legacy", Color.BOLD)
     print("    It runs the script in legacy mode")
+    printClr("An optional argument is --autogen", Color.BOLD)
+    print("    It names the episodes numerically, rather than the filename")
     printClr("An optional argument is --help", Color.BOLD)
 
 
@@ -239,6 +246,7 @@ def main(args):
     openload = False
     auto_update = True
     run_legacy = False
+    auto_gen = False
 
     episode_range = []
     episode_range_single = False
@@ -248,8 +256,8 @@ def main(args):
 
     sleepy_time = 0.1
 
-    # print that capcha warning
-    printCapchaWarning()
+    # print that captcha warning
+    printCaptchaWarning()
 
     if(len(args) < 2):
         printClr("Error: kissanime_dl takes in 2 args, the url, and the path to download to",
@@ -364,6 +372,9 @@ def main(args):
 
             elif(case_arg == "--legacy"):
                 run_legacy = True
+
+            elif(case_arg == "--autogen"):
+            	auto_gen = True
 
             else:
                 printClr("Unknown argument: " +
@@ -568,13 +579,13 @@ def main(args):
                         if(to_add is False):
                             to_add = getOpenLoadUrls(ur, ses, sleepy_increment * count + sleepy_time, verbose)
                             if(to_add is False):
-                                printClr("Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
+                                printClr("Failed to find url. You may have to check captcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
                     elif(openload is True):
                         to_add = getOpenLoadUrls(ur, ses, sleepy_increment * count + sleepy_time, verbose)
                         if(to_add is False):
                             to_add = getBlogspotUrls(ur, ses, sleepy_increment * count + sleepy_time, quality_txt, verbose)
                             if(to_add is False):
-                                printClr("Failed to find url. You may have to check capcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
+                                printClr("Failed to find url. You may have to check captcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
 
                     if(to_add is not False):
                         queuee.put(to_add)
@@ -657,7 +668,7 @@ def main(args):
         lazy_programming = 0
         for dl_sing_url in dl_urls:
             thrs.append(threading.Thread(target=downloadFile, args=(
-                dl_sing_url, dl_path, PATH_TO_HISTORY, url)))
+                dl_sing_url, dl_path, PATH_TO_HISTORY, url, auto_gen)))
             thrs[lazy_programming].daemon = True
             thrs[lazy_programming].start()
             lazy_programming += 1
@@ -705,7 +716,7 @@ def main(args):
                     printClr('Captcha Error @ ' + dl_link, Color.RED, Color.BOLD)
                     return
 
-                downloadFile(dl_pkg, dl_path, PATH_TO_HISTORY, url)
+                downloadFile(dl_pkg, dl_path, PATH_TO_HISTORY, url, auto_gen)
                 dl_link = updatePool()
 
         for i in range(num_thrs):
