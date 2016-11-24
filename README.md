@@ -144,6 +144,9 @@ Optional arguments:
     
 --legacy
    	Runs the script in legacy mode (before update 1.9.0)
+	
+--autogen
+	Names the episodes numerically rather than the found filename. Good when it outputs clunky names.
 
 --help: Prints help
 ```
