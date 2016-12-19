@@ -80,9 +80,15 @@ def autoUpdate():
 
 
 def printCaptchaWarning():
-    printClr("""Warning: Version 1.9.0 and above uses a new method to download movies. It may be slower, but should still download everything.
-Use the --legacy flag (not guaranteed to work!) if you want the old method.""",
+    printClr("""Warning: Version 1.9.5 changed the host of kissanime.to to kissanime.ru.""",
              Color.BOLD, Color.YELLOW)
+
+def clearAndWriteHistory(urls_arr, PATH_TO_HISTORY, masterurl):
+    json_his_data = {JSON_HIS_MASTER_LINK_KEY: masterurl}
+    json_his_data[JSON_HIS_VID_LINKS_KEY] = urls_arr
+
+    with open(PATH_TO_HISTORY, 'w') as f_data:
+        json.dump(json_his_data, f_data)
 
 
 def writeHistory(urls_arr, PATH_TO_HISTORY, masterurl):
@@ -127,7 +133,6 @@ def uprint(any):
         print(any)
     except UnicodeEncodeError:
         return "Unsupported characters in " + sys.stdout.encoding
-
 
 def downloadFile(url, dl_path, PATH_TO_HISTORY, masterurl, should_autogen):
 
@@ -187,7 +192,7 @@ def downloadFile(url, dl_path, PATH_TO_HISTORY, masterurl, should_autogen):
 def printError():
     printClr("The first argument is the url or update", Color.BOLD)
     print("    'update' can only be given if kissanime_dl has been run in that directory before")
-    print("    The url can be from kissanime.to, kisscartoon.me, and kissasian.com")
+    print("    The url can be from kissanime.ru, kisscartoon.me, and kissasian.com")
     printClr(
         "The second argument is the path to download to or '-' which auto creates a directory for you", Color.BOLD)
     printClr("An optional argument is --verbose", Color.BOLD)
@@ -427,33 +432,38 @@ def main(args):
         if(verbose):
             print("Found url from history: " + url)
 
-        if(url != magiclink[JSON_HIS_MASTER_LINK_KEY]):
-            # check to make sure that what is being passed in is in a new
-            # directory or the same url
-            printClr("The url passed in does not match the url(" + magiclink[
-                     JSON_HIS_MASTER_LINK_KEY] + ")present in " + LINK_HISTORY_FILE_NAME, Color.BOLD, Color.RED)
-            printClr("Try running kissanime_dl in another directory", Color.BOLD)
-            return
+        if "kissanime.to" in url:
+            # I want to convert all kissanime.to to kissanime.ru first
+            url = url.replace("kissanime.to", "kissanime.ru")
+
+            newmagiclink = [];
+            for lnk in magiclink[JSON_HIS_VID_LINKS_KEY]:
+                newmagiclink.append(lnk.replace("kissanime.to", "kissanime.ru") )
+
+            magiclink[JSON_HIS_VID_LINKS_KEY] = newmagiclink
+
+            #rewrite history file!
+            printClr("Porting history file from kissanime.to to kissanime.ru!", Color.BOLD, Color.YELLOW)
+            clearAndWriteHistory(newmagiclink, PATH_TO_HISTORY, url)
+
 
     # Makes sure to connect to valid-ish urls.
     vurl_result = [i for i in valid_begin if i in url]
     vurl_result += [i for i in valid_end if i in url]
     vurl_result[0] = "http://" + vurl_result[0]
 
-    if(url != "update"):
+    if(len(vurl_result) < 2):
+        printClr(url + " is not a valid url!", Color.BOLD, Color.RED)
+        return
 
-        if(len(vurl_result) < 2):
-            printClr(url + " is not a valid url!", Color.BOLD, Color.RED)
-            return
-
-        # Makes sure okay connection to site
-        thehead = requests.head(url)
-        if(thehead.status_code != requests.codes.ok and thehead.status_code != 503):
-            printClr("Failed to get a good status code at " +
-                     url, Color.BOLD, Color.RED)
-            printClr("Status Code: " + str(thehead.status_code),
-                     Color.BOLD, Color.RED)
-            return
+    # Makes sure okay connection to site
+    thehead = requests.head(url)
+    if(thehead.status_code != requests.codes.ok and thehead.status_code != 503):
+        printClr("Failed to get a good status code at " +
+                 url, Color.BOLD, Color.RED)
+        printClr("Status Code: " + str(thehead.status_code),
+                 Color.BOLD, Color.RED)
+        return
 
     # new session creater
     sess = makeSession(url, vurl_result, verbose)

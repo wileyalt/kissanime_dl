@@ -2,7 +2,7 @@
 # In separate file for easy finding in future should any more sites be included
 
 valid_begin = {
-    "kissanime.to",
+    "kissanime.ru",
     "kisscartoon.me",
     "kissasian.com"
 }
