@@ -31,9 +31,9 @@ pip
 #Installation
 ##*nix or OSX:
 
-For some odd reason, this requires sudo for lxml 3.6.0
+For some odd reason, this requires sudo for lxml
 ```
-STATIC_DEPS=true sudo -H pip install lxml==3.6.0
+STATIC_DEPS=true sudo -H pip install lxml
 pip install kissanime_dl
 ```
 
@@ -48,7 +48,7 @@ sudo easy_install pip
 sudo pip install --upgrade requests
 sudo pip install js2py
 sudo pip install pycryptodome
-sudo easy_install lxml==3.6.0
+sudo easy_install lxml
 
 # Install kissanime_dl
 pip install -U kissanime_dl
@@ -79,7 +79,7 @@ There are more steps needed. First, go to
 
 http://www.lfd.uci.edu/~gohlke/pythonlibs/#lxml
 
-and download the proper 3.6.0 lxml wheel.
+and download the latest lxml wheel.
 
 Then, type
 ```
@@ -144,6 +144,9 @@ Optional arguments:
     
 --legacy
    	Runs the script in legacy mode (before update 1.9.0)
+	
+--autogen
+	Names the episodes numerically rather than the found filename. Good when it outputs clunky names.
 
 --help: Prints help
 ```
