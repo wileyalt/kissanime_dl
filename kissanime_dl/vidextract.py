@@ -8,7 +8,7 @@ import sys
 try:
     # python2
     from urllib import unquote
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     # python3
     from urllib.parse import unquote
 
@@ -17,15 +17,15 @@ from lxml import html
 
 try:
     from kissenc import kissencCartoon, kissencAsian, kissencAnime
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     from .kissenc import kissencCartoon, kissencAsian, kissencAnime
 try:
     from color_print import Color, printClr
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     from .color_print import Color, printClr
 try:
     from js_exc_decode import jsdecode2
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     from .js_exc_decode import jsdecode2
 
 mu = threading.Lock()

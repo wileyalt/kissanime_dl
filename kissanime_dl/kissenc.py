@@ -3,7 +3,7 @@
 
 try:
     from pkcs7 import PKCS7Encoder
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     from .pkcs7 import PKCS7Encoder
 
 from Crypto.Protocol import KDF

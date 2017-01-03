@@ -4,7 +4,7 @@ import binascii
 
 try:
     import StringIO
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     from io import StringIO
 
 

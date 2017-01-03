@@ -15,13 +15,13 @@ from datetime import timedelta
 try:
     # python2
     from Queue import Queue
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     # python3
     from queue import Queue
 try:
     # python2
     from urlparse import urlparse
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     # python3
     from urllib.parse import urlparse
 
@@ -31,31 +31,31 @@ from lxml import html
 
 try:
     from version import __version__
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     from .version import __version__
 try:
     from session_make import makeSession
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     from .session_make import makeSession
 
 try:
     from validhead import valid_begin, valid_end
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     from .validhead import valid_begin, valid_end
 
 try:
     from color_print import Color, printClr
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     from .color_print import Color, printClr
 
 try:
     from jsexec import convJStoPy
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     from .jsexec import convJStoPy
 
 try:
     from vidextract import getOpenLoadUrls, getBlogspotUrls
-except ImportError:
+except (ImportError, ModuleNotFoundError):
     from .vidextract import getOpenLoadUrls, getBlogspotUrls
 
 url = ''
