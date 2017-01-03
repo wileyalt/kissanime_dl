@@ -31,8 +31,7 @@ def makeSession(url, vurl_result, verbose):
     # begin session
     sess = requests.Session()
     sess.keep_alive = True
-    sess.headers[
-        "User-Agent"] = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"
+    sess.headers["User-Agent"] = "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36"
 
     r = sess.get(url, timeout=30.0)
     if verbose:
