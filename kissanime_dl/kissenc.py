@@ -35,7 +35,7 @@ comb['Asian']['f'] = binascii.unhexlify(asian_c)
 # BEGIN CARTOON
 comb['Cartoon'] = {}
 comb['Cartoon']['sha'] = ""
-comb['Cartoon']['topost'] = 'http://kisscartoon.me/External/RSK'
+comb['Cartoon']['topost'] = 'http://kisscartoon.se/External/RSK'
 comb['Cartoon']['payload'] = {}
 comb['Cartoon']['f'] = binascii.unhexlify(cartoon_hex)
 # END CARTOON
