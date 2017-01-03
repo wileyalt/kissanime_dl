@@ -11,5 +11,5 @@ install:
   - "python.exe -m pip install ."
 
 test_script:
-  - "kissanime-dl https://kissanime.to/Anime/Kuma-Miko-Girl-meets-Bear . --simulate --verbose"
+  - "kissanime-dl https://kissanime.ru/Anime/Kuma-Miko-Girl-meets-Bear . --simulate --verbose"
 
