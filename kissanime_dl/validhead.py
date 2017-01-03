@@ -3,7 +3,7 @@
 
 valid_begin = {
     "kissanime.ru",
-    "kisscartoon.me",
+    "kisscartoon.se",
     "kissasian.com"
 }
 

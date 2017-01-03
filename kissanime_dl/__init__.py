@@ -80,7 +80,7 @@ def autoUpdate():
 
 
 def printCaptchaWarning():
-    printClr("""Warning: Version 1.9.5 changed the host of kissanime.to to kissanime.ru.""",
+    printClr("""Warning: Version 1.9.6 changed the host of kisscartoon.me to kisscartoon.se.""",
              Color.BOLD, Color.YELLOW)
 
 def clearAndWriteHistory(urls_arr, PATH_TO_HISTORY, masterurl):
@@ -192,7 +192,7 @@ def downloadFile(url, dl_path, PATH_TO_HISTORY, masterurl, should_autogen):
 def printError():
     printClr("The first argument is the url or update", Color.BOLD)
     print("    'update' can only be given if kissanime_dl has been run in that directory before")
-    print("    The url can be from kissanime.ru, kisscartoon.me, and kissasian.com")
+    print("    The url can be from kissanime.ru, kisscartoon.se, and kissasian.com")
     printClr(
         "The second argument is the path to download to or '-' which auto creates a directory for you", Color.BOLD)
     printClr("An optional argument is --verbose", Color.BOLD)
@@ -432,20 +432,26 @@ def main(args):
         if(verbose):
             print("Found url from history: " + url)
 
-        if "kissanime.to" in url:
-            # I want to convert all kissanime.to to kissanime.ru first
-            url = url.replace("kissanime.to", "kissanime.ru")
-
+        def portHistoryFile(fromurl, tourl):
             newmagiclink = [];
             for lnk in magiclink[JSON_HIS_VID_LINKS_KEY]:
-                newmagiclink.append(lnk.replace("kissanime.to", "kissanime.ru") )
+                newmagiclink.append(lnk.replace(fromurl, tourl) )
 
             magiclink[JSON_HIS_VID_LINKS_KEY] = newmagiclink
 
             #rewrite history file!
-            printClr("Porting history file from kissanime.to to kissanime.ru!", Color.BOLD, Color.YELLOW)
+            printClr("Porting history file from " + fromurl + " to " + tourl + "!", Color.BOLD, Color.YELLOW)
             clearAndWriteHistory(newmagiclink, PATH_TO_HISTORY, url)
 
+        if "kissanime.to" in url:
+            # I want to convert all kissanime.to to kissanime.ru first
+            url = url.replace("kissanime.to", "kissanime.ru")
+            portHistoryFile("kissanime.to", "kissanime.ru")
+
+        if "kisscartoon.me" in url:
+            #convert kisscartoon.me to kisscartoon.se
+            url = url.replace("kisscartoon.me", "kisscartoon.se")
+            portHistoryFile("kisscartoon.me", "kisscartoon.se")
 
     # Makes sure to connect to valid-ish urls.
     vurl_result = [i for i in valid_begin if i in url]
