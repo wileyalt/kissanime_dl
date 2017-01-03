@@ -11,51 +11,53 @@ import threading
 import time
 import shutil
 import json
+
 from datetime import timedelta
 try:
     # python2
     from Queue import Queue
-except (ImportError, ModuleNotFoundError):
+except ImportError:
     # python3
     from queue import Queue
+
 try:
     # python2
     from urlparse import urlparse
-except (ImportError, ModuleNotFoundError):
+except ImportError:
     # python3
     from urllib.parse import urlparse
 
 import requests
 from lxml import html
 
-
 try:
     from version import __version__
-except (ImportError, ModuleNotFoundError):
+except ImportError:
     from .version import __version__
+
 try:
     from session_make import makeSession
-except (ImportError, ModuleNotFoundError):
+except ImportError:
     from .session_make import makeSession
 
 try:
     from validhead import valid_begin, valid_end
-except (ImportError, ModuleNotFoundError):
+except ImportError:
     from .validhead import valid_begin, valid_end
 
 try:
     from color_print import Color, printClr
-except (ImportError, ModuleNotFoundError):
+except ImportError:
     from .color_print import Color, printClr
 
 try:
     from jsexec import convJStoPy
-except (ImportError, ModuleNotFoundError):
+except ImportError:
     from .jsexec import convJStoPy
 
 try:
     from vidextract import getOpenLoadUrls, getBlogspotUrls
-except (ImportError, ModuleNotFoundError):
+except ImportError:
     from .vidextract import getOpenLoadUrls, getBlogspotUrls
 
 url = ''

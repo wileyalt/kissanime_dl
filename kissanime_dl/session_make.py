@@ -8,18 +8,18 @@ import time
 try:
     # python2
     from urlparse import urlparse
-except (ImportError, ModuleNotFoundError):
+except ImportError:
     # python3
     from urllib.parse import urlparse
 
 try:
     from color_print import Color, printClr
-except (ImportError, ModuleNotFoundError):
+except ImportError:
     from .color_print import Color, printClr
 
 try:
     from jsexec import convJStoPy
-except (ImportError, ModuleNotFoundError):
+except ImportError:
     from .jsexec import convJStoPy
 
 
