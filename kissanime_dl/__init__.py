@@ -78,7 +78,7 @@ write_hist = threading.Lock()
 
 def autoUpdate():
     printClr("Checking for updates", Color.BOLD)
-    pip.main(['install', '--upgrade', '--upgrade-strategy', 'only-if-needed', 'kissanime-dl'])
+    pip.main(['install', '--quiet', '--upgrade', '--upgrade-strategy', 'only-if-needed', 'kissanime-dl'])
 
 
 def printCaptchaWarning():
