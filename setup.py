@@ -81,8 +81,8 @@ setup(name='kissanime_dl',
       install_requires=[
           'requests>=2.12.4',
           'lxml>=3.5.0',
-          'js2py==0.41',
-          'pycryptodome==3.4'
+          'js2py==0.43',
+          'pycryptodome==3.4.3'
       ],
       zip_safe=False,
       entry_points={
