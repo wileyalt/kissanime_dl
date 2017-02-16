@@ -5,7 +5,7 @@
 
 
 Downloads all mp4s from a kissanime, kisscartoon, or kissasian mastersite!
-(kissanime.to/Anime/*, kisscartoon.me/Cartoon/*, kissasian.com/Drama/)
+(kissanime.ru/AnimeList/*, kisscartoon.se/CartoonList/*, kissasian.com/DramaList/)
 
 ##Currently supports as hosts:
 
@@ -141,10 +141,10 @@ Optional arguments:
 --delay=SEC
 	Adds a delay between get requests to the master page
 	Value in seconds
-    
+
 --legacy
    	Runs the script in legacy mode (before update 1.9.0)
-	
+
 --autogen
 	Names the episodes numerically rather than the found filename. Good when it outputs clunky names.
 
@@ -156,25 +156,28 @@ Optional arguments:
 ```
 
 ##Initial run
-kissanime-dl https://kissanime.to/Anime/NHK-ni-Youkoso ~/Videos/NHK
+kissanime-dl https://kissanime.ru/Anime/NHK-ni-Youkoso ~/Videos/NHK
 
 ##To update videos
 kissanime-dl update ~/Videos/NHK
 
 ##Download one episode
-kissanime-dl https://kissanime.to/Anime/NHK-ni-Youkoso ~/Videos/NHK --episode=5
+kissanime-dl https://kissanime.ru/Anime/NHK-ni-Youkoso ~/Videos/NHK --episode=5
 
 ##Download range of episodes
-kissanime-dl https://kissanime.to/Anime/NHK-ni-Youkoso ~/Videos/NHK --episode=20%4
+kissanime-dl https://kissanime.ru/Anime/NHK-ni-Youkoso ~/Videos/NHK --episode=20%4
 
 ##Choose quality
-kissanime-dl https://kissanime.to/Anime/NHK-ni-Youkoso ~/Videos/NHK --quality=1080
+kissanime-dl https://kissanime.ru/Anime/NHK-ni-Youkoso ~/Videos/NHK --quality=1080
 
 ##Make txt file
-kissanime-dl https://kissanime.to/Anime/NHK-ni-Youkoso ~/Videos/NHK --txtlinks
+kissanime-dl https://kissanime.ru/Anime/NHK-ni-Youkoso ~/Videos/NHK --txtlinks
 
 ##Force history
-kissanime-dl https://kissanime.to/Anime/NHK-ni-Youkoso ~/Videos/NHK --forcehistory
+kissanime-dl https://kissanime.ru/Anime/NHK-ni-Youkoso ~/Videos/NHK --forcehistory
+
+##Auto generate episode filenames numerically
+kissanime-dl https://kissanime.ru/Anime/NHK-ni-Youkoso ~/Videos/NHK --autogen
 ```
 I think you get the picture
 
