@@ -5,7 +5,7 @@
 
 
 Downloads all mp4s from a kissanime, kisscartoon, or kissasian mastersite!
-(kissanime.ru/AnimeList/*, kisscartoon.se/CartoonList/*, kissasian.com/DramaList/)
+(kissanime.ru/Anime/*, kisscartoon.se/Cartoon/*, kissasian.com/Drama/)
 
 ##Currently supports as hosts:
 
