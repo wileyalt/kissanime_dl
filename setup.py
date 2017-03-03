@@ -82,7 +82,7 @@ setup(name='kissanime_dl',
           'requests>=2.13.0',
           'lxml>=3.5.0',
           'js2py>=0.44',
-          'pycryptodome>=3.4.3',
+          'pycryptodome>=3.4.5',
           'pip>=9.0.1'
       ],
       zip_safe=False,
