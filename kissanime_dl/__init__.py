@@ -78,8 +78,7 @@ write_hist = threading.Lock()
 
 def autoUpdate():
     printClr("Checking for updates", Color.BOLD)
-    pip.main(['install', '--quiet', '--upgrade', '--upgrade-strategy', 'only-if-needed', 'kissanime-dl'])
-
+    pip.main(['install', '--quiet', '--upgrade', '--upgrade-strategy', 'only-if-needed', 'kissanime_dl'])
 
 def printCaptchaWarning():
     printClr("""Warning: Version 1.9.6 changed the host of kisscartoon.me to kisscartoon.se.""",
@@ -91,7 +90,6 @@ def clearAndWriteHistory(urls_arr, PATH_TO_HISTORY, masterurl):
 
     with open(PATH_TO_HISTORY, 'w') as f_data:
         json.dump(json_his_data, f_data)
-
 
 def writeHistory(urls_arr, PATH_TO_HISTORY, masterurl):
     # lets write that history file!
