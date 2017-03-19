@@ -56,9 +56,9 @@ except ImportError:
     from .jsexec import convJStoPy
 
 try:
-    from vidextract import getOpenLoadUrls, getBlogspotUrls
+    from vidextract import getBlogspotUrls
 except ImportError:
-    from .vidextract import getOpenLoadUrls, getBlogspotUrls
+    from .vidextract import getBlogspotUrls
 
 url = ''
 JSON_HIS_MASTER_LINK_KEY = "master_link"
@@ -122,7 +122,7 @@ def cVunicode(any):
     if isinstance(any, str) and sys.version_info < (3, 0, 0):
         return any.encode('utf-8').strip()
     return any
-	
+    
 # cross version of printing unicode
 def uprint(any):
     try:
@@ -248,7 +248,6 @@ def main(args):
     simulate = False
     txtlinks = False
     forcehistory = False
-    openload = False
     auto_update = True
     run_legacy = False
     auto_gen = False
@@ -366,9 +365,6 @@ def main(args):
             elif(case_arg == "--forcehistory"):
                 forcehistory = True
 
-            elif(case_arg == "--openload"):
-                openload = True
-
             elif(case_arg == "--noupdate"):
                 auto_update = False
 
@@ -379,7 +375,7 @@ def main(args):
                 run_legacy = True
 
             elif(case_arg == "--autogen"):
-            	auto_gen = True
+                auto_gen = True
 
             else:
                 printClr("Unknown argument: " +
@@ -590,18 +586,10 @@ def main(args):
             for ur in links:
                 try:
                     to_add = ""
-                    if(openload is False):
-                        to_add = getBlogspotUrls(ur, ses, sleepy_increment * count + sleepy_time, quality_txt, verbose)
-                        if(to_add is False):
-                            to_add = getOpenLoadUrls(ur, ses, sleepy_increment * count + sleepy_time, verbose)
-                            if(to_add is False):
-                                printClr("Failed to find url. You may have to check captcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
-                    elif(openload is True):
-                        to_add = getOpenLoadUrls(ur, ses, sleepy_increment * count + sleepy_time, verbose)
-                        if(to_add is False):
-                            to_add = getBlogspotUrls(ur, ses, sleepy_increment * count + sleepy_time, quality_txt, verbose)
-                            if(to_add is False):
-                                printClr("Failed to find url. You may have to check captcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
+                    to_add = getBlogspotUrls(ur, ses, sleepy_increment * count + sleepy_time, quality_txt, verbose)
+                    
+                    if(to_add is False):
+                        printClr("Failed to find url. You may have to check captcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
 
                     if(to_add is not False):
                         queuee.put(to_add)
@@ -609,7 +597,7 @@ def main(args):
                 except Exception as e:
                     printClr("Error thrown while attempting to find download url: " +
                              repr(e), Color.BOLD, Color.RED)
-                    print(sys.exc_info()[-1].tb_lineno)
+                    printClr("Line no. " + str(sys.exc_info()[-1].tb_lineno), Color.BOLD, Color.RED)
                 count += 1
 
         dl_urls = Queue()

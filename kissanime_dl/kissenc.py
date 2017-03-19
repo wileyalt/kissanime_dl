@@ -40,6 +40,10 @@ comb['Cartoon']['payload'] = {}
 comb['Cartoon']['f'] = binascii.unhexlify(cartoon_hex)
 # END CARTOON
 
+comb['Anime'] = {}
+comb['Anime']['sha'] = binascii.unhexlify(SHA256.new("nhasasdbasdtene7230asb6n23ncasdln213").hexdigest() )
+comb['Anime']['f'] = binascii.unhexlify("a5e8d2e9c1721ae0e84ad660c472c1f3".encode('utf8') )
+
 
 def ver5(raw_str, sess, type):
     # for version 5
@@ -52,12 +56,11 @@ def ver5(raw_str, sess, type):
 
     if(sha == ''):
         post_data = sess.post(topost, headers=post_headers, data=payload)
-        comb[type]['sha'] = post_data.text.encode('utf8')
+        obj_sha = SHA256.new(post_data.text.encode('utf8') )
+        comb[type]['sha'] = binascii.unhexlify(obj_sha.hexdigest() )
         sha = comb[type]['sha']
 
-    obj_sha = SHA256.new(sha)
-    a = binascii.unhexlify(obj_sha.hexdigest())
-    g = AES.new(a, AES.MODE_CBC, f)
+    g = AES.new(sha, AES.MODE_CBC, f)
     jj = base64.b64decode(raw_str)
     #
     filled = g.decrypt(jj)
@@ -70,6 +73,17 @@ def ver3(raw_str, sess, type):
     # same
     return ver5(raw_str, sess, type)
 
+def ovelWrap(raw_str):
+    # ovelWrap
+    # for now specifically only for kissanime
+    ciphertext = base64.b64decode(raw_str)
+    key = comb['Anime']['sha']
+    iv = comb['Anime']['f']
+
+    decoder = AES.new(key, AES.MODE_CBC, iv)
+    filledstr = decoder.decrypt(ciphertext)
+
+    return pkc.decode(filledstr).decode('utf8')
 
 def kissencCartoon(raw_str, sess):
     # Using Version 3
@@ -82,4 +96,4 @@ def kissencAsian(raw_str, sess):
 
 
 def kissencAnime(raw_str):
-    return base64.b64decode(raw_str).decode('utf8')
+    return ovelWrap(raw_str)

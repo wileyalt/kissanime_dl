@@ -31,9 +31,9 @@ except ImportError:
 mu = threading.Lock()
 print_mu = threading.Lock()
 
-DOWNLOAD_URL_X_PATH = "//select[@id='selectQuality']"
+DOWNLOAD_URL_X_PATH = "//select[@id='slcQualix']"
 DOWNLOAD_URL_X_PATH_DEFAULT = DOWNLOAD_URL_X_PATH + "/option[1]/@value"
-DOWNLOAD_NAME = "//div[@id='divFileName']/b/following::node()"
+DOWNLOAD_FILENAME = "//div[@id='divFileName']/b/following::node()"
 
 # arr of all the escape chars
 escapes = ''.join([chr(char) for char in range(1, 32)])
@@ -52,73 +52,6 @@ def uprint(any):
         print(any)
     except UnicodeEncodeError:
         return "Unsupported characters in " + sys.stdout.encoding
-
-
-def getOpenLoadUrls(link, ses, sleeptime, verbose=False):
-    #deprecated!
-    time.sleep(sleeptime)
-
-    payload = {"s": "openload"}
-
-    mu.acquire()
-    html_raw = ses.get(link, params=payload)
-    mu.release()
-
-    html_str = html_raw.content
-
-    lxml_parse = html.fromstring(html_str)
-
-    # Selected server option
-    SEL_SER_OPT = "//select[@id='selectServer']/option[text()='Openload']"
-    if(len(lxml_parse.xpath(SEL_SER_OPT)) == 0):
-        return False
-
-    find_str = r"""src=\"https?:\/\/openload.co(.*?)\""""
-
-    try:
-        raw_data = re.search(find_str, html_str).group(1)
-    except AttributeError as e:
-        printClr("Regex Failure", Color.RED, Color.BOLD)
-        printClr("Could not find '" + find_str +
-                 "'", Color.RED, Color.BOLD)
-        return False
-    except TypeError:
-        raw_data = re.search(find_str, html_str.decode(
-            html_raw.encoding)).group(1)
-    except:
-        printClr("Unknown Regex Error", Color.RED, Color.BOLD)
-        printClr("Pattern: " + find_str, Color.RED, Color.BOLD)
-        return False
-
-    raw_data = "https://openload.co" + raw_data
-
-    mu.acquire()
-    temp_r = ses.get(raw_data)
-    mu.release()
-
-    lxml_parse = html.fromstring(temp_r.content)
-
-    hiddenurl_xpath = "//*[@id='hiddenurl']/text()"
-    deobfuscatedaa = jsdecode2(lxml_parse.xpath(hiddenurl_xpath)[0])
-
-    deobfuscatedaa = "https://openload.co/stream/" + deobfuscatedaa
-
-    mu.acquire()
-    temp_head = ses.head(deobfuscatedaa)
-    mu.release()
-
-    # openload now redirects
-    redirect = temp_head.headers['location']
-
-    file_name = unquote(redirect).rpartition('/')[-1]
-
-    if(verbose):
-        print_mu.acquire()
-        print("Found download link: " + redirect)
-        uprint("Found file name: " + file_name)
-        print_mu.release()
-
-    return [file_name, redirect, link]
 
 def getBlogspotUrls(link, ses, sleeptime, quality_txt, verbose=False):
     genned_x_path = DOWNLOAD_URL_X_PATH
@@ -145,7 +78,7 @@ def getBlogspotUrls(link, ses, sleeptime, quality_txt, verbose=False):
     html_str = html_raw.content
 
     temp_tree = html.fromstring(html_str)
-    raw_data = temp_tree.xpath(DOWNLOAD_NAME)
+    raw_data = temp_tree.xpath(DOWNLOAD_FILENAME)
 
     if(len(raw_data) == 0):
         return False
