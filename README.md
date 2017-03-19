@@ -11,11 +11,6 @@ Downloads all mp4s from a kissanime, kisscartoon, or kissasian mastersite!
 
 Blogspot
 
-~~Openload.co~~
-
-
-##DOES NOT SUPPORT ONEDRIVE
-
 
 #Dependencies:
 lxml
@@ -131,9 +126,6 @@ Optional arguments:
 --forcehistory
 	Forces a history to be written with the given episodes.
 	This is good for manually setting files you don't want to download when updating
-
-—-openload
-	Puts priority to using openload as host.
 
 —noupdate
 	Prevents kissanime_dl from autoupdating
