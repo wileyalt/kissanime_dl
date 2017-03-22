@@ -1,4 +1,4 @@
-#kissanime-dl
+# kissanime-dl
 
 [![Build Status](https://travis-ci.org/wileyyugioh/kissanime_dl.svg?branch=master)](https://travis-ci.org/wileyyugioh/kissanime_dl)
 [![Build status](https://ci.appveyor.com/api/projects/status/github/wileyyugioh/kissanime_dl?svg=true)](https://ci.appveyor.com/project/wileyyugioh/kissanime-dl)
@@ -7,12 +7,12 @@
 Downloads all mp4s from a kissanime, kisscartoon, or kissasian mastersite!
 (kissanime.ru/Anime/*, kisscartoon.se/Cartoon/*, kissasian.com/Drama/)
 
-##Currently supports as hosts:
+## Currently supports as hosts:
 
 Blogspot
 
 
-#Dependencies:
+# Dependencies:
 lxml
 
 requests
@@ -23,8 +23,8 @@ pycryptodome
 
 pip
 
-#Installation
-##*nix or OSX:
+# Installation
+## *nix or OSX:
 
 For some odd reason, this requires sudo for lxml
 ```
@@ -56,7 +56,7 @@ Note :  If  `pip install -U kissanime_dl`  is run with root privileges,
         install module with root privileges or run download as root
         once an update is available and normally after that
 
-##Windows:
+## Windows:
 
 Windows is a tricky one.
 
@@ -84,7 +84,7 @@ where PATH_LXML is the path to the lxml wheel you downloaded.
 
 Then, try to reinstall.
 
-#Usage:
+# Usage:
 ```
 
 Type into shell:
@@ -144,7 +144,7 @@ Optional arguments:
 ```
 
 
-#Example Usage
+# Example Usage
 ```
 
 ##Initial run
@@ -173,7 +173,7 @@ kissanime-dl https://kissanime.ru/Anime/NHK-ni-Youkoso ~/Videos/NHK --autogen
 ```
 I think you get the picture
 
-#Usage for non-commandline
+# Usage for non-commandline
 ```
 import kissanime_dl
 kissanime_dl.main(['update', '.', '--simulate'])
