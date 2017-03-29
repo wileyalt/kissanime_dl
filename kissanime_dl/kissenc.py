@@ -7,9 +7,9 @@ except ImportError:
     from .pkcs7 import PKCS7Encoder
 
 try:
-    import jspyck
+    from jspyck import decode
 except ImportError:
-    import .jspyck
+    from .jspyck import decode
 
 from Crypto.Protocol import KDF
 from Crypto.Cipher import AES
