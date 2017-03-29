@@ -6,6 +6,11 @@ try:
 except ImportError:
     from .pkcs7 import PKCS7Encoder
 
+try:
+    import jspyck
+except ImportError:
+    import .jspyck
+
 from Crypto.Protocol import KDF
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
@@ -41,7 +46,7 @@ comb['Cartoon']['f'] = binascii.unhexlify(cartoon_hex)
 # END CARTOON
 
 comb['Anime'] = {}
-comb['Anime']['sha'] = binascii.unhexlify(SHA256.new("nhasasdbasdtene7230asb6n23ncasdln213").hexdigest() )
+comb['Anime']['sha'] = ""
 comb['Anime']['f'] = binascii.unhexlify("a5e8d2e9c1721ae0e84ad660c472c1f3".encode('utf8') )
 
 
@@ -73,9 +78,18 @@ def ver3(raw_str, sess, type):
     # same
     return ver5(raw_str, sess, type)
 
-def ovelWrap(raw_str):
+def ovelWrap(raw_str, sess):
     # ovelWrap
     # for now specifically only for kissanime
+    if(comb['Anime']['sha'] == ""):
+    	basekey = 'nhasasdbasdtene7230asb'
+    	basekey = basekey + '6n23ncasdln213'
+    	basekey = basekey.replace('a', 'c')
+
+    	#to be worked on
+    	comb['Anime']['sha'] = basekey
+
+
     ciphertext = base64.b64decode(raw_str)
     key = comb['Anime']['sha']
     iv = comb['Anime']['f']
@@ -95,5 +109,5 @@ def kissencAsian(raw_str, sess):
     return ver5(raw_str, sess, "Asian")
 
 
-def kissencAnime(raw_str):
-    return ovelWrap(raw_str)
+def kissencAnime(raw_str, sess):
+    return ovelWrap(raw_str, sess)
