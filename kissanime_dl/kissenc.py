@@ -86,9 +86,11 @@ def ovelWrap(raw_str, sess):
     	basekey = basekey + '6n23ncasdln213'
     	basekey = basekey.replace('a', 'c')
 
-    	#to be worked on
-    	comb['Anime']['sha'] = basekey
+        shakey = SHA256.new(basekey).hexdigest()
+        shakey = binascii.unhexlify(shakey)
 
+    	#to be worked on
+    	comb['Anime']['sha'] = shakey
 
     ciphertext = base64.b64decode(raw_str)
     key = comb['Anime']['sha']
@@ -96,6 +98,7 @@ def ovelWrap(raw_str, sess):
 
     decoder = AES.new(key, AES.MODE_CBC, iv)
     filledstr = decoder.decrypt(ciphertext)
+
 
     return pkc.decode(filledstr).decode('utf8')
 

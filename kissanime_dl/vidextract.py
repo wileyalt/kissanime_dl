@@ -117,7 +117,7 @@ def getBlogspotUrls(link, ses, sleeptime, quality_txt, verbose=False):
 
     if("/Anime/" in link):
         # site is kissanime
-        discovered_url = kissencAnime(temp_tree.xpath(dl_url_x_path)[0])
+        discovered_url = kissencAnime(temp_tree.xpath(dl_url_x_path)[0], ses)
     elif("/Cartoon/" in link):
         # site is kisscartoon
         discovered_url = kissencCartoon(
