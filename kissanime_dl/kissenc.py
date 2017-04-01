@@ -6,11 +6,6 @@ try:
 except ImportError:
     from .pkcs7 import PKCS7Encoder
 
-try:
-    from jspyck import decode
-except ImportError:
-    from .jspyck import decode
-
 from Crypto.Protocol import KDF
 from Crypto.Cipher import AES
 from Crypto.Hash import SHA256
@@ -78,19 +73,20 @@ def ver3(raw_str, sess, type):
     # same
     return ver5(raw_str, sess, type)
 
-def ovelWrap(raw_str, sess):
+def ovelWrap(raw_str, sess, backup=False):
     # ovelWrap
     # for now specifically only for kissanime
     if(comb['Anime']['sha'] == ""):
-    	basekey = 'nhasasdbasdtene7230asb'
-    	basekey = basekey + '6n23ncasdln213'
-    	basekey = basekey.replace('a', 'c')
+        basekey = 'nhasasdbasdtene7230asb'
+        if(backup):
+            basekey = basekey + '6n23ncasdln213'
+            basekey = basekey.replace('a', 'c')
 
         shakey = SHA256.new(basekey).hexdigest()
         shakey = binascii.unhexlify(shakey)
 
-    	#to be worked on
-    	comb['Anime']['sha'] = shakey
+        #to be worked on
+        comb['Anime']['sha'] = shakey
 
     ciphertext = base64.b64decode(raw_str)
     key = comb['Anime']['sha']
@@ -99,8 +95,12 @@ def ovelWrap(raw_str, sess):
     decoder = AES.new(key, AES.MODE_CBC, iv)
     filledstr = decoder.decrypt(ciphertext)
 
+    try:
+        decoded = pkc.decode(filledstr).decode('utf8')
+    except ValueError:
+        decoded = ovelWrap(raw_str, sess, True)
 
-    return pkc.decode(filledstr).decode('utf8')
+    return decoded
 
 def kissencCartoon(raw_str, sess):
     # Using Version 3
