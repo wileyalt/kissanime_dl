@@ -53,8 +53,14 @@ def uprint(any):
     except UnicodeEncodeError:
         return "Unsupported characters in " + sys.stdout.encoding
 
+class ERROR_RETURN:
+    NO_ERROR = 0
+    NO_FILENAME = 1
+    DECODE_FAIL = 2
+
 def getBlogspotUrls(link, ses, sleeptime, quality_txt, verbose=False):
     genned_x_path = DOWNLOAD_URL_X_PATH
+    error_type = ERROR_RETURN.NO_ERROR
 
     if(quality_txt != ""):
         genned_x_path = genned_x_path + \
@@ -80,39 +86,6 @@ def getBlogspotUrls(link, ses, sleeptime, quality_txt, verbose=False):
     temp_tree = html.fromstring(html_str)
     raw_data = temp_tree.xpath(DOWNLOAD_FILENAME)
 
-    if(len(raw_data) == 0):
-        return False
-
-    def sanitize(funky_str):
-        # removes all those escape chars from the string
-        try:
-            ft = funky_str.replace(" ", '').translate(None, escapes)
-        except TypeError:
-            try:
-                ft = funky_str.replace(" ", '').translate(
-                    str.maketrans(dict.fromkeys(escapes)))
-            except AttributeError:
-                # python 2
-                ft = funky_str.replace(" ", '').translate(
-                    dict.fromkeys(escapes))
-
-        return ft
-
-    format_txt = sanitize(raw_data[0])
-
-    # With email protection, sometimes only the [ is shown
-    if(format_txt == "["):
-        # hmm. this is a hacky fix
-        # The rest of the data is generally in 5?
-        format_txt = format_txt + sanitize(raw_data[5])
-
-        # no quality found
-    if(len(temp_tree.xpath(dl_url_x_path)) == 0 and quality_txt != ""):
-        printClr("Quality " + quality_txt +
-                 " is not found", Color.RED, Color.BOLD)
-        printClr("Defaulting to highest quality", Color.BOLD)
-        dl_url_x_path = DOWNLOAD_URL_X_PATH_DEFAULT
-
     discovered_url = ""
 
     if("/Anime/" in link):
@@ -130,7 +103,47 @@ def getBlogspotUrls(link, ses, sleeptime, quality_txt, verbose=False):
         # unknown site
         printClr("Error in finding method to decode video url from " +
                  link, Color.RED, Color.BOLD)
-        return False
+        return [ERROR_RETURN.DECODE_FAIL]
+
+    format_txt = ""
+
+    if(len(raw_data) == 0):
+        printClr("Error in finding filename.", Color.BOLD, Color.RED)
+        format_txt = link
+        error_type = ERROR_RETURN.NO_FILENAME
+    else:
+        def findName():
+            def sanitize(funky_str):
+                # removes all those escape chars from the string
+                try:
+                    ft = funky_str.replace(" ", '').translate(None, escapes)
+                except TypeError:
+                    try:
+                        ft = funky_str.replace(" ", '').translate(
+                            str.maketrans(dict.fromkeys(escapes)))
+                    except AttributeError:
+                        # python 2
+                        ft = funky_str.replace(" ", '').translate(
+                            dict.fromkeys(escapes))
+
+                return ft
+
+            format_txt = sanitize(raw_data[0])
+
+            # With email protection, sometimes only the [ is shown
+            if(format_txt == "["):
+                # hmm. this is a hacky fix
+                # The rest of the data is generally in 5?
+                format_txt = format_txt + sanitize(raw_data[5])
+
+                # no quality found
+            if(len(temp_tree.xpath(dl_url_x_path)) == 0 and quality_txt != ""):
+                printClr("Quality " + quality_txt +
+                         " is not found", Color.RED, Color.BOLD)
+                printClr("Defaulting to highest quality", Color.BOLD)
+                dl_url_x_path = DOWNLOAD_URL_X_PATH_DEFAULT
+
+        findName()
 
     if(verbose):
         print_mu.acquire()
@@ -138,4 +151,4 @@ def getBlogspotUrls(link, ses, sleeptime, quality_txt, verbose=False):
         uprint("Found file name: " + format_txt)
         print_mu.release()
 
-    return [format_txt, discovered_url, link]
+    return [error_type, format_txt, discovered_url, link]

@@ -56,9 +56,9 @@ except ImportError:
     from .jsexec import convJStoPy
 
 try:
-    from vidextract import getBlogspotUrls
+    from vidextract import getBlogspotUrls, ERROR_RETURN
 except ImportError:
-    from .vidextract import getBlogspotUrls
+    from .vidextract import getBlogspotUrls, ERROR_RETURN
 
 url = ''
 JSON_HIS_MASTER_LINK_KEY = "master_link"
@@ -588,11 +588,15 @@ def main(args):
                     to_add = ""
                     to_add = getBlogspotUrls(ur, ses, sleepy_increment * count + sleepy_time, quality_txt, verbose)
                     
-                    if(to_add is False):
+                    if(to_add[0] is ERROR_RETURN.DECODE_FAIL):
                         printClr("Failed to find url. You may have to check captcha, or KissAnime may have changed video host.", Color.RED, Color.BOLD)
+                        continue
 
-                    if(to_add is not False):
-                        queuee.put(to_add)
+                    if(to_add[0] is ERROR_RETURN.NO_FILENAME):
+                        printClr('Enabling auto_gen')
+                        auto_gen = True
+
+                    queuee.put(to_add[1:])
 
                 except Exception as e:
                     printClr("Error thrown while attempting to find download url: " +

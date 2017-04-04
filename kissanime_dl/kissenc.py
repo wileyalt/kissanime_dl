@@ -76,7 +76,11 @@ def ver3(raw_str, sess, type):
 def ovelWrap(raw_str, sess, backup=False):
     # ovelWrap
     # for now specifically only for kissanime
-    if(comb['Anime']['sha'] == ""):
+
+    shakey = comb['Anime']['sha']
+    if(shakey == ""):
+        # let's gen a new key
+        # We check if the key works later and if so set it to the dictionary
         basekey = 'nhasasdbasdtene7230asb'
         if(backup):
             basekey = basekey + '6n23ncasdln213'
@@ -85,20 +89,22 @@ def ovelWrap(raw_str, sess, backup=False):
         shakey = SHA256.new(basekey).hexdigest()
         shakey = binascii.unhexlify(shakey)
 
-        #to be worked on
-        comb['Anime']['sha'] = shakey
-
     ciphertext = base64.b64decode(raw_str)
-    key = comb['Anime']['sha']
+    key = shakey
     iv = comb['Anime']['f']
 
     decoder = AES.new(key, AES.MODE_CBC, iv)
     filledstr = decoder.decrypt(ciphertext)
 
+    decoded = ""
+
     try:
         decoded = pkc.decode(filledstr).decode('utf8')
     except ValueError:
-        decoded = ovelWrap(raw_str, sess, True)
+        if(backup is False):
+            decoded = ovelWrap(raw_str, sess, backup=True)
+
+    comb['Anime']['sha'] = shakey
 
     return decoded
 
