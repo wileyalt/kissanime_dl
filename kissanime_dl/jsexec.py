@@ -2,7 +2,6 @@
 
 import js2py
 
-
 def cVunicode(any):
     try:
         return unicode(any, utf8)

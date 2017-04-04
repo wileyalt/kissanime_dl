@@ -108,7 +108,7 @@ def getBlogspotUrls(link, ses, sleeptime, quality_txt, verbose=False):
     format_txt = ""
 
     if(len(raw_data) == 0):
-        printClr("Error in finding filename.", Color.BOLD, Color.RED)
+        printClr("Error in finding filename", Color.BOLD, Color.RED)
         format_txt = link
         error_type = ERROR_RETURN.NO_FILENAME
     else:

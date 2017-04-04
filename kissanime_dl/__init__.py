@@ -593,7 +593,7 @@ def main(args):
                         continue
 
                     if(to_add[0] is ERROR_RETURN.NO_FILENAME):
-                        printClr('Enabling auto_gen')
+                        printClr('Enabling auto_gen', Color.BOLD, Color.YELLOW)
                         auto_gen = True
 
                     queuee.put(to_add[1:])
