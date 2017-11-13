@@ -1,3 +1,5 @@
+# Due to all the new hurdles, development is over. Thanks for all the support!
+
 # kissanime-dl
 
 [![Build Status](https://travis-ci.org/wileyyugioh/kissanime_dl.svg?branch=master)](https://travis-ci.org/wileyyugioh/kissanime_dl)
